@@ -15,9 +15,9 @@ use ReflectionUnionType;
  * Implements PSR-11 ContainerInterface for a service container
  * See: https://www.php-fig.org/psr/psr-11/
  *
- * This class is a container for services. Its services array is
- * filled at the construction and then never modified: it is
- * immutable. Thus it avoid side effects.
+ * This class is a container for services. Its responsibility
+ * is to instantiate a service and its dependencies using
+ * reflection and recursiveness.
  *
  * @package AGerault\Framework\Services
  * @author Alexandre Gérault
