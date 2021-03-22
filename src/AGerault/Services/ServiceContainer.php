@@ -80,7 +80,8 @@ class ServiceContainer implements ServiceContainerInterface
         return $this->instances[$id];
     }
 
-    #[Pure] public function has(string $id): bool
+    #[Pure]
+    public function has(string $id): bool
     {
         return isset($this->instances[$id]);
     }
