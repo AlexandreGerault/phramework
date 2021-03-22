@@ -3,6 +3,8 @@
 use AGerault\Framework\Services\ServiceContainer;
 use Test\Fixtures\Services\BarService;
 use Test\Fixtures\Services\FooService;
+use Test\Fixtures\Services\RandomService;
+use Test\Fixtures\Services\RandomServiceInterface;
 use Test\Fixtures\Services\UnionTypeServiceInjection;
 
 it(
@@ -24,7 +26,7 @@ it(
 );
 
 it(
-    'checks that it can build classes depending on another service',
+    'can build classes depending on another service',
     function () {
         $container = new ServiceContainer();
 
@@ -41,3 +43,16 @@ it(
         expect($container->get(UnionTypeServiceInjection::class))->toBeInstanceOf(UnionTypeServiceInjection::class);
     }
 )->throws(Exception::class);
+
+it(
+    'can inject interfaces implementation',
+    function () {
+        $container = new ServiceContainer();
+
+        $container->addAlias(RandomServiceInterface::class, RandomService::class);
+
+        $container->get(RandomServiceInterface::class);
+
+        expect($container->get(RandomServiceInterface::class))->toBeInstanceOf(RandomServiceInterface::class);
+    }
+);

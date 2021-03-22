@@ -8,12 +8,9 @@ use Throwable;
 
 class ServiceNotFoundException extends \Exception implements ServiceNotFoundExceptionInterface
 {
-    #[Pure] public function __construct(string $serviceId = "", $code = 0, Throwable $previous = null)
+    #[Pure]
+    public function __construct(string $serviceId = "")
     {
-        parent::__construct(
-            "Cannot find the service identified by " . $serviceId,
-            $code,
-            $previous
-        );
+        parent::__construct("Cannot find the service identified by " . $serviceId);
     }
 }

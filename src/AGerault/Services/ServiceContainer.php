@@ -44,36 +44,42 @@ class ServiceContainer implements ServiceContainerInterface
      */
     public function get(string $id): mixed
     {
-        if (! class_exists($id)) {
-            throw new ContainerException();
+        if (! class_exists($id) && ! interface_exists($id)) {
+            throw new ContainerException("This class does not exist");
         }
 
         // If we have no instances of this id, let's build one
         if (! $this->has($id)) {
             $reflectionClass = new ReflectionClass($id);
 
-            // If the constructor of the class is null, no dependencies are required
-            // Else we need to build each dependency
-            if ($reflectionClass->getConstructor() === null) {
-                $this->instances[$id] = $reflectionClass->newInstance();
+            // If we are handling an interface, we have to resolve to its class
+            // Else we are dealing with a class and we build it
+            if ($reflectionClass->isInterface()) {
+                return $this->get($this->aliases[$id]);
             } else {
-                $constructor = $reflectionClass->getConstructor();
-                $parameters  = $constructor->getParameters();
+                // If the constructor of the class is null, no dependencies are required
+                // Else we need to build each dependency
+                if ($reflectionClass->getConstructor() === null) {
+                    $this->instances[$id] = $reflectionClass->newInstance();
+                } else {
+                    $constructor = $reflectionClass->getConstructor();
+                    $parameters  = $constructor->getParameters();
 
-                $this->instances[$id] = $reflectionClass->newInstanceArgs(
-                    array_map(
-                        function ($param) {
-                            $paramType = $param->getType();
+                    $this->instances[$id] = $reflectionClass->newInstanceArgs(
+                        array_map(
+                            function ($param) {
+                                $paramType = $param->getType();
 
-                            if ($paramType instanceof ReflectionNamedType) {
-                                return $this->get($paramType->getName());
-                            } else {
-                                throw new ContainerException();
-                            }
-                        },
-                        $parameters
-                    )
-                );
+                                if ($paramType instanceof ReflectionNamedType) {
+                                    return $this->get($paramType->getName());
+                                } else {
+                                    throw new ContainerException("Cannot use UnionTypeParameter in constructor");
+                                }
+                            },
+                            $parameters
+                        )
+                    );
+                }
             }
         }
 
@@ -84,5 +90,10 @@ class ServiceContainer implements ServiceContainerInterface
     public function has(string $id): bool
     {
         return isset($this->instances[$id]);
+    }
+
+    public function addAlias(string $alias, string $target): void
+    {
+        $this->aliases[$alias] = $target;
     }
 }
