@@ -9,7 +9,7 @@ use JetBrains\PhpStorm\Pure;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionNamedType;
-use ReflectionUnionType;
+use ReflectionParameter;
 
 /**
  * Implements PSR-11 ContainerInterface for a service container
@@ -65,20 +65,7 @@ class ServiceContainer implements ServiceContainerInterface
                     $constructor = $reflectionClass->getConstructor();
                     $parameters  = $constructor->getParameters();
 
-                    $this->instances[$id] = $reflectionClass->newInstanceArgs(
-                        array_map(
-                            function ($param) {
-                                $paramType = $param->getType();
-
-                                if ($paramType instanceof ReflectionNamedType) {
-                                    return $this->get($paramType->getName());
-                                } else {
-                                    throw new ContainerException("Cannot use UnionTypeParameter in constructor");
-                                }
-                            },
-                            $parameters
-                        )
-                    );
+                    $this->instances[$id] = $reflectionClass->newInstanceArgs($this->buildParameters($parameters));
                 }
             }
         }
@@ -92,8 +79,37 @@ class ServiceContainer implements ServiceContainerInterface
         return isset($this->instances[$id]);
     }
 
+    /**
+     * @param string $alias
+     * @param string $target
+     */
     public function addAlias(string $alias, string $target): void
     {
         $this->aliases[$alias] = $target;
+    }
+
+    /**
+     * Build each dependency
+     *
+     * @param ReflectionParameter[] $parameters
+     * @return array<mixed>
+     * @throws ContainerException
+     * @throws ReflectionException
+     * @throws ServiceNotFoundException
+     */
+    private function buildParameters(array $parameters): array
+    {
+        return array_map(
+            function (ReflectionParameter $param) {
+                $paramType = $param->getType();
+
+                if ($paramType instanceof ReflectionNamedType) {
+                    return $this->get($paramType->getName());
+                } else {
+                    throw new ContainerException("Cannot use UnionTypeParameter in constructor");
+                }
+            },
+            $parameters
+        );
     }
 }
