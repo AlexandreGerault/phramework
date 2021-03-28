@@ -1,11 +1,14 @@
 <?php
 
+use AGerault\Framework\Services\Exceptions\ContainerException;
+use AGerault\Framework\Services\Exceptions\ServiceNotFoundException;
 use AGerault\Framework\Services\ServiceContainer;
 use Test\Fixtures\Services\BarService;
 use Test\Fixtures\Services\FooService;
 use Test\Fixtures\Services\NotSharedService;
 use Test\Fixtures\Services\RandomService;
 use Test\Fixtures\Services\RandomServiceInterface;
+use Test\Fixtures\Services\ServiceDependingOnNonExistingClass;
 use Test\Fixtures\Services\ServiceWithParameters;
 use Test\Fixtures\Services\UnionTypeServiceInjection;
 
@@ -28,6 +31,15 @@ it(
 );
 
 it(
+    'should throw a not found exception if the class or interface does not exist',
+    function () {
+        $container = new ServiceContainer();
+
+        $container->get('Foo');
+    }
+)->throws(ServiceNotFoundException::class);
+
+it(
     'should build classes and its dependencies',
     function () {
         $container = new ServiceContainer();
@@ -42,9 +54,9 @@ it(
     function () {
         $container = new ServiceContainer();
 
-        expect($container->get(UnionTypeServiceInjection::class))->toBeInstanceOf(UnionTypeServiceInjection::class);
+        $container->get(UnionTypeServiceInjection::class);
     }
-)->throws(Exception::class);
+)->throws(ContainerException::class);
 
 it(
     'should be able to inject interfaces implementation',
@@ -86,3 +98,12 @@ it(
         expect($service->getParameter())->toBe('Parameter');
     }
 );
+
+it(
+    'throws an exception when trying to register a non existing class',
+    function () {
+        $container = new ServiceContainer();
+
+        $container->register('a');
+    }
+)->throws(ServiceNotFoundException::class);
