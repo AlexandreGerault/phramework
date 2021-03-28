@@ -3,6 +3,7 @@
 use AGerault\Framework\Services\ServiceContainer;
 use Test\Fixtures\Services\BarService;
 use Test\Fixtures\Services\FooService;
+use Test\Fixtures\Services\NotSharedService;
 use Test\Fixtures\Services\RandomService;
 use Test\Fixtures\Services\RandomServiceInterface;
 use Test\Fixtures\Services\UnionTypeServiceInjection;
@@ -17,7 +18,7 @@ it(
 );
 
 it(
-    'checks that returned services have the same instance',
+    'should return the same service instance',
     function () {
         $container = new ServiceContainer();
 
@@ -26,7 +27,7 @@ it(
 );
 
 it(
-    'can build classes depending on another service',
+    'should build classes and its dependencies',
     function () {
         $container = new ServiceContainer();
 
@@ -36,7 +37,7 @@ it(
 );
 
 it(
-    'checks that it throws an exception when trying to use an union type in service constructor',
+    'should throws an exception when trying to use an union type in service constructor',
     function () {
         $container = new ServiceContainer();
 
@@ -45,7 +46,7 @@ it(
 )->throws(Exception::class);
 
 it(
-    'can inject interfaces implementation',
+    'should be able to inject interfaces implementation',
     function () {
         $container = new ServiceContainer();
 
@@ -54,5 +55,18 @@ it(
         $container->get(RandomServiceInterface::class);
 
         expect($container->get(RandomServiceInterface::class))->toBeInstanceOf(RandomServiceInterface::class);
+    }
+);
+
+it(
+    'should return a different service instance if it is not shared',
+    function () {
+        $container = new ServiceContainer();
+
+        $container->getDefinition(NotSharedService::class)->makeNotShared();
+        $instanceA = $container->get(NotSharedService::class);
+        $instanceB = $container->get(NotSharedService::class);
+
+        expect(spl_object_id($instanceA))->not()->toBe(spl_object_id($instanceB));
     }
 );

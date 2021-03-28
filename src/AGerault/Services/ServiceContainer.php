@@ -3,6 +3,7 @@
 namespace AGerault\Framework\Services;
 
 use AGerault\Framework\Contracts\Services\ServiceContainerInterface;
+use AGerault\Framework\Contracts\Services\ServiceDefinitionInterface;
 use AGerault\Framework\Services\Exceptions\ContainerException;
 use AGerault\Framework\Services\Exceptions\ServiceNotFoundException;
 use JetBrains\PhpStorm\Pure;
@@ -35,6 +36,11 @@ class ServiceContainer implements ServiceContainerInterface
     protected array $instances = [];
 
     /**
+     * @var array<ServiceDefinitionInterface>
+     */
+    protected array $definitions = [];
+
+    /**
      * @param string $id
      *
      * @return mixed
@@ -44,38 +50,28 @@ class ServiceContainer implements ServiceContainerInterface
      */
     public function get(string $id): mixed
     {
-        if (! class_exists($id) && ! interface_exists($id)) {
+        if (!class_exists($id) && !interface_exists($id)) {
             throw new ContainerException("This class does not exist");
         }
 
         // If we have no instances of this id, let's build one
-        if (! $this->has($id)) {
-            $reflectionClass = new ReflectionClass($id);
+        if (!$this->has($id)) {
+            $instance = $this->resolve($id);
 
-            // If we are handling an interface, we have to resolve to its class
-            // Else we are dealing with a class and we build it
-            if ($reflectionClass->isInterface()) {
-                return $this->get($this->aliases[$id]);
-            } else {
-                // If the constructor of the class is null, no dependencies are required
-                // Else we need to build each dependency
-                if ($reflectionClass->getConstructor() === null) {
-                    $this->instances[$id] = $reflectionClass->newInstance();
-                } else {
-                    $constructor = $reflectionClass->getConstructor();
-                    $parameters  = $constructor->getParameters();
-
-                    $this->instances[$id] = $reflectionClass->newInstanceArgs($this->buildParameters($parameters));
-                }
+            if (! $this->getDefinition($id)->isShared()) {
+                return $instance;
             }
+
+            $this->instances[$id] = $instance;
         }
 
         return $this->instances[$id];
     }
 
     #[Pure]
-    public function has(string $id): bool
-    {
+    public function has(
+        string $id
+    ): bool {
         return isset($this->instances[$id]);
     }
 
@@ -92,24 +88,107 @@ class ServiceContainer implements ServiceContainerInterface
      * Build each dependency
      *
      * @param ReflectionParameter[] $parameters
+     * @param callable $getter
      * @return array<mixed>
      * @throws ContainerException
-     * @throws ReflectionException
-     * @throws ServiceNotFoundException
      */
-    private function buildParameters(array $parameters): array
+    private function buildParameters(array $parameters, callable $getter): array
     {
         return array_map(
-            function (ReflectionParameter $param) {
+            function (ReflectionParameter $param) use ($getter) {
                 $paramType = $param->getType();
 
                 if ($paramType instanceof ReflectionNamedType) {
-                    return $this->get($paramType->getName());
+                    return $getter($paramType->getName());
                 } else {
                     throw new ContainerException("Cannot use UnionTypeParameter in constructor");
                 }
             },
             $parameters
+        );
+    }
+
+    /**
+     * @param string $id
+     * @throws ContainerException
+     * @throws ReflectionException
+     */
+    public function register(string $id): void
+    {
+        $reflectionClass = new ReflectionClass($id);
+
+        if ($reflectionClass->isInterface()) {
+            $this->register($this->aliases[$id]);
+            $this->definitions[$id] = &$this->definitions[$this->aliases[$id]];
+            return;
+        }
+
+        $constructor = $reflectionClass->getConstructor();
+        $dependencies = [];
+
+        if ($constructor !== null) {
+            $dependencies = $this->buildParameters(
+                $constructor->getParameters(),
+                function (string $name) {
+                    return $this->getDefinition($name);
+                }
+            );
+        }
+
+        $aliases = array_filter($this->aliases, fn(string $alias) => $alias === $id);
+
+        $definition = new ServiceDefinition($id, true, $aliases, $dependencies);
+
+        $this->definitions[$id] = $definition;
+    }
+
+    /**
+     * @param string $id
+     * @return ServiceDefinitionInterface
+     * @throws ContainerException
+     * @throws ReflectionException
+     */
+    public function getDefinition(string $id): ServiceDefinitionInterface
+    {
+        if (!isset($this->definitions[$id])) {
+            $this->register($id);
+        }
+
+        return $this->definitions[$id];
+    }
+
+    /**
+     * @param $id
+     * @return object
+     * @throws ContainerException
+     * @throws ReflectionException
+     */
+    private function resolve($id): object
+    {
+        $reflectionClass = new ReflectionClass($id);
+
+        // If we are handling an interface, we have to resolve to its class
+        if ($reflectionClass->isInterface()) {
+            return $this->resolve($this->aliases[$id]);
+        }
+
+        $this->getDefinition($id);
+
+        // If the constructor of the class is null, no dependencies are required
+        if ($reflectionClass->getConstructor() === null) {
+            return $reflectionClass->newInstance();
+        }
+
+        $constructor = $reflectionClass->getConstructor();
+        $parameters = $constructor->getParameters();
+
+        return $reflectionClass->newInstanceArgs(
+            $this->buildParameters(
+                $parameters,
+                function (string $name) {
+                    return $this->get($name);
+                }
+            )
         );
     }
 }
