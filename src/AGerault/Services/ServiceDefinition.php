@@ -23,7 +23,7 @@ class ServiceDefinition implements ServiceDefinitionInterface
     /**
      * The class' interface name
      *
-     * @var array
+     * @var array<string>
      */
     protected array $aliases = [];
 
@@ -38,7 +38,7 @@ class ServiceDefinition implements ServiceDefinitionInterface
      * ServiceDefinition constructor.
      * @param string $id
      * @param bool $shared
-     * @param array $aliases
+     * @param array<string> $aliases
      * @param ServiceDefinitionInterface[] $dependencies
      */
     public function __construct(string $id, bool $shared = true, array $aliases = [], array $dependencies = [])
@@ -54,6 +54,9 @@ class ServiceDefinition implements ServiceDefinitionInterface
         return $this->shared;
     }
 
+    /**
+     * @return array<string>
+     */
     public function aliases(): array
     {
         return $this->aliases;

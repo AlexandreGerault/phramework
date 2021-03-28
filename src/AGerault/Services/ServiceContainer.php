@@ -5,7 +5,6 @@ namespace AGerault\Framework\Services;
 use AGerault\Framework\Contracts\Services\ServiceContainerInterface;
 use AGerault\Framework\Contracts\Services\ServiceDefinitionInterface;
 use AGerault\Framework\Services\Exceptions\ContainerException;
-use AGerault\Framework\Services\Exceptions\ServiceNotFoundException;
 use JetBrains\PhpStorm\Pure;
 use ReflectionClass;
 use ReflectionException;
@@ -44,7 +43,6 @@ class ServiceContainer implements ServiceContainerInterface
      * @param string $id
      *
      * @return mixed
-     * @throws ServiceNotFoundException
      * @throws ReflectionException
      * @throws ContainerException
      */
@@ -69,9 +67,8 @@ class ServiceContainer implements ServiceContainerInterface
     }
 
     #[Pure]
-    public function has(
-        string $id
-    ): bool {
+    public function has(string $id): bool
+    {
         return isset($this->instances[$id]);
     }
 
@@ -115,6 +112,10 @@ class ServiceContainer implements ServiceContainerInterface
      */
     public function register(string $id): void
     {
+        if (!class_exists($id) && !interface_exists($id)) {
+            throw new ContainerException("This class does not exist");
+        }
+
         $reflectionClass = new ReflectionClass($id);
 
         if ($reflectionClass->isInterface()) {
@@ -158,13 +159,17 @@ class ServiceContainer implements ServiceContainerInterface
     }
 
     /**
-     * @param $id
+     * @param string $id
      * @return object
      * @throws ContainerException
      * @throws ReflectionException
      */
-    private function resolve($id): object
+    private function resolve(string $id): object
     {
+        if (!class_exists($id) && !interface_exists($id)) {
+            throw new ContainerException("This class does not exist");
+        }
+
         $reflectionClass = new ReflectionClass($id);
 
         // If we are handling an interface, we have to resolve to its class
