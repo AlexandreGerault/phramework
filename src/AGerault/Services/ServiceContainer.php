@@ -5,6 +5,7 @@ namespace AGerault\Framework\Services;
 use AGerault\Framework\Contracts\Services\ServiceContainerInterface;
 use AGerault\Framework\Contracts\Services\ServiceDefinitionInterface;
 use AGerault\Framework\Services\Exceptions\ContainerException;
+use AGerault\Framework\Services\Exceptions\ServiceNotFoundException;
 use JetBrains\PhpStorm\Pure;
 use ReflectionClass;
 use ReflectionException;
@@ -50,14 +51,11 @@ class ServiceContainer implements ServiceContainerInterface
      *
      * @return mixed
      * @throws ReflectionException
+     * @throws ServiceNotFoundException
      * @throws ContainerException
      */
     public function get(string $id): mixed
     {
-        if (!class_exists($id) && !interface_exists($id)) {
-            throw new ContainerException("This class does not exist");
-        }
-
         // If we have no instances of this id, let's build one
         if (!$this->has($id)) {
             $instance = $this->resolve($id);
@@ -104,8 +102,6 @@ class ServiceContainer implements ServiceContainerInterface
                 if ($paramType instanceof ReflectionNamedType) {
                     return $this->getDefinition($paramType->getName());
                 }
-
-                throw new ContainerException("Cannot use UnionTypeParameter in constructor");
             },
             array_filter(
                 $parameters,
@@ -119,9 +115,7 @@ class ServiceContainer implements ServiceContainerInterface
                                 return false;
                             }
                         }
-                        return true;
                     }
-                    throw new ContainerException(sprintf("[%s] dependency type is unknown", $param->getName()));
                 }
             )
         );
@@ -156,11 +150,12 @@ class ServiceContainer implements ServiceContainerInterface
      * @param string $id
      * @throws ContainerException
      * @throws ReflectionException
+     * @throws ServiceNotFoundException
      */
     public function register(string $id): void
     {
         if (!class_exists($id) && !interface_exists($id)) {
-            throw new ContainerException(sprintf("[%s] does not exist as a class or interface", $id));
+            throw new ServiceNotFoundException(sprintf("[%s] does not exist as a class or interface", $id));
         }
 
         $reflectionClass = new ReflectionClass($id);
@@ -190,6 +185,7 @@ class ServiceContainer implements ServiceContainerInterface
      * @return ServiceDefinitionInterface
      * @throws ContainerException
      * @throws ReflectionException
+     * @throws ServiceNotFoundException
      */
     public function getDefinition(string $id): ServiceDefinitionInterface
     {
@@ -205,11 +201,12 @@ class ServiceContainer implements ServiceContainerInterface
      * @return object
      * @throws ContainerException
      * @throws ReflectionException
+     * @throws ServiceNotFoundException
      */
     private function resolve(string $id): object
     {
         if (!class_exists($id) && !interface_exists($id)) {
-            throw new ContainerException("This class does not exist");
+            throw new ServiceNotFoundException("This class or interface cannot be resolved");
         }
 
         $reflectionClass = new ReflectionClass($id);
