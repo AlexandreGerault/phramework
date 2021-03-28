@@ -6,6 +6,7 @@ use Test\Fixtures\Services\FooService;
 use Test\Fixtures\Services\NotSharedService;
 use Test\Fixtures\Services\RandomService;
 use Test\Fixtures\Services\RandomServiceInterface;
+use Test\Fixtures\Services\ServiceWithParameters;
 use Test\Fixtures\Services\UnionTypeServiceInjection;
 
 it(
@@ -68,5 +69,20 @@ it(
         $instanceB = $container->get(NotSharedService::class);
 
         expect(spl_object_id($instanceA))->not()->toBe(spl_object_id($instanceB));
+    }
+);
+
+it(
+    'should be able to build a service depending on parameters',
+    function () {
+        $container = new ServiceContainer();
+
+        $container->addParameter('parameter', 'Parameter');
+        /**
+         * @var ServiceWithParameters $service
+         */
+        $service = $container->get(ServiceWithParameters::class);
+
+        expect($service->getParameter())->toBe('Parameter');
     }
 );

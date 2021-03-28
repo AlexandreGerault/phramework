@@ -26,4 +26,18 @@ interface ServiceContainerInterface extends ContainerInterface
      * @return ServiceDefinitionInterface
      */
     public function getDefinition(string $id): ServiceDefinitionInterface;
+
+    /**
+     * Register a new parameter
+     *
+     * @param string $id
+     * @param mixed $value
+     */
+    public function addParameter(string $id, mixed $value): void;
+
+    /**
+     * @param string $id
+     * @return mixed
+     */
+    public function getParameter(string $id): mixed;
 }

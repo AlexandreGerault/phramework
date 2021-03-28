@@ -10,6 +10,7 @@ use ReflectionClass;
 use ReflectionException;
 use ReflectionNamedType;
 use ReflectionParameter;
+use ReflectionUnionType;
 
 /**
  * Implements PSR-11 ContainerInterface for a service container
@@ -38,6 +39,11 @@ class ServiceContainer implements ServiceContainerInterface
      * @var array<ServiceDefinitionInterface>
      */
     protected array $definitions = [];
+
+    /**
+     * @var array<string, mixed>
+     */
+    protected array $parameters = [];
 
     /**
      * @param string $id
@@ -85,21 +91,62 @@ class ServiceContainer implements ServiceContainerInterface
      * Build each dependency
      *
      * @param ReflectionParameter[] $parameters
-     * @param callable $getter
      * @return array<mixed>
      * @throws ContainerException
+     * @throws ReflectionException
      */
-    private function buildParameters(array $parameters, callable $getter): array
+    private function buildDependencies(array $parameters): array
     {
         return array_map(
-            function (ReflectionParameter $param) use ($getter) {
+            function (ReflectionParameter $param) {
                 $paramType = $param->getType();
 
                 if ($paramType instanceof ReflectionNamedType) {
-                    return $getter($paramType->getName());
-                } else {
-                    throw new ContainerException("Cannot use UnionTypeParameter in constructor");
+                    return $this->getDefinition($paramType->getName());
                 }
+
+                throw new ContainerException("Cannot use UnionTypeParameter in constructor");
+            },
+            array_filter(
+                $parameters,
+                function (ReflectionParameter $param) {
+                    $type = $param->getType();
+                    if ($type instanceof ReflectionNamedType) {
+                        return ! $type->isBuiltin();
+                    } elseif ($type instanceof ReflectionUnionType) {
+                        foreach ($type->getTypes() as $t) {
+                            if (! $t->isBuiltin()) {
+                                return false;
+                            }
+                        }
+                        return true;
+                    }
+                    throw new ContainerException(sprintf("[%s] dependency type is unknown", $param->getName()));
+                }
+            )
+        );
+    }
+
+    /**
+     * @param array<mixed> $parameters
+     * @return array<mixed>
+     * @throws ContainerException
+     * @throws ReflectionException
+     */
+    private function buildParameters(array $parameters): array
+    {
+        return array_map(
+            function (ReflectionParameter $param) {
+                $paramType = $param->getType();
+
+                if ($paramType instanceof ReflectionNamedType) {
+                    if ($paramType->isBuiltin()) {
+                        return $this->getParameter($param->getName());
+                    }
+                    return $this->get($paramType->getName());
+                }
+
+                throw new ContainerException("Cannot use UnionTypeParameter in constructor");
             },
             $parameters
         );
@@ -113,7 +160,7 @@ class ServiceContainer implements ServiceContainerInterface
     public function register(string $id): void
     {
         if (!class_exists($id) && !interface_exists($id)) {
-            throw new ContainerException("This class does not exist");
+            throw new ContainerException(sprintf("[%s] does not exist as a class or interface", $id));
         }
 
         $reflectionClass = new ReflectionClass($id);
@@ -128,12 +175,7 @@ class ServiceContainer implements ServiceContainerInterface
         $dependencies = [];
 
         if ($constructor !== null) {
-            $dependencies = $this->buildParameters(
-                $constructor->getParameters(),
-                function (string $name) {
-                    return $this->getDefinition($name);
-                }
-            );
+            $dependencies = $this->buildDependencies($constructor->getParameters());
         }
 
         $aliases = array_filter($this->aliases, fn(string $alias) => $alias === $id);
@@ -187,13 +229,16 @@ class ServiceContainer implements ServiceContainerInterface
         $constructor = $reflectionClass->getConstructor();
         $parameters = $constructor->getParameters();
 
-        return $reflectionClass->newInstanceArgs(
-            $this->buildParameters(
-                $parameters,
-                function (string $name) {
-                    return $this->get($name);
-                }
-            )
-        );
+        return $reflectionClass->newInstanceArgs($this->buildParameters($parameters));
+    }
+
+    public function addParameter(string $id, mixed $value): void
+    {
+        $this->parameters[$id] = $value;
+    }
+
+    public function getParameter(string $id): mixed
+    {
+        return $this->parameters[$id];
     }
 }
