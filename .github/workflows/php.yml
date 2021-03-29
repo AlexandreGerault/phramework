@@ -12,7 +12,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+
     - uses: actions/checkout@v2
+
+    - name: Setup PHP with Xdebug
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.0'
+        coverage: xdebug
 
     - name: Validate composer.json and composer.lock
       run: composer validate --strict
@@ -35,7 +42,6 @@ jobs:
         CC_TEST_REPORTER_ID: ${{secrets.CC_TEST_REPORTER_ID}}
       with:
         coverageCommand: vendor/bin/pest --coverage
-        coverageLocations: ${{github.workspace}}/target/site/jacoco/jacoco.xml:jacoco
 
     # Add a test script to composer.json, for instance: "test": "vendor/bin/phpunit"
     # Docs: https://getcomposer.org/doc/articles/scripts.md
