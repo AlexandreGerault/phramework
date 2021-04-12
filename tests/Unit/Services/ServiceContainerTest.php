@@ -8,7 +8,6 @@ use Test\Fixtures\Services\FooService;
 use Test\Fixtures\Services\NotSharedService;
 use Test\Fixtures\Services\RandomService;
 use Test\Fixtures\Services\RandomServiceInterface;
-use Test\Fixtures\Services\ServiceDependingOnNonExistingClass;
 use Test\Fixtures\Services\ServiceWithParameters;
 use Test\Fixtures\Services\UnionTypeServiceInjection;
 
