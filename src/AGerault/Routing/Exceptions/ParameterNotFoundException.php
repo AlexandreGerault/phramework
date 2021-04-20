@@ -1,10 +1,9 @@
 <?php
 
-
 namespace AGerault\Framework\Routing\Exceptions;
 
+use Exception;
 
-class ParameterNotFoundException
+class ParameterNotFoundException extends Exception
 {
-
 }
