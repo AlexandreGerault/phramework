@@ -19,6 +19,7 @@
     <coverage processUncoveredFiles="true">
         <include>
             <directory suffix=".php">./src/AGerault/Services</directory>
+            <directory suffix=".php">./src/AGerault/Routing</directory>
         </include>
         <report>
             <clover outputFile="var/coverage/clover.xml"/>
