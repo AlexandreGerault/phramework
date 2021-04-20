@@ -1,10 +1,9 @@
 <?php
 
+namespace AGerault\Framework\Routing\Exceptions;
 
-namespace AGerault\Framework\Routing;
+use Exception;
 
-
-class RouteNotFoundException
+class RouteNotFoundException extends Exception
 {
-
 }
