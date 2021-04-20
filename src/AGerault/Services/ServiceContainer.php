@@ -92,6 +92,7 @@ class ServiceContainer implements ServiceContainerInterface
      * @return array<mixed>
      * @throws ContainerException
      * @throws ReflectionException
+     * @throws ServiceNotFoundException
      */
     private function buildDependencies(array $parameters): array
     {
@@ -126,6 +127,7 @@ class ServiceContainer implements ServiceContainerInterface
      * @return array<mixed>
      * @throws ContainerException
      * @throws ReflectionException
+     * @throws ServiceNotFoundException
      */
     private function buildParameters(array $parameters): array
     {

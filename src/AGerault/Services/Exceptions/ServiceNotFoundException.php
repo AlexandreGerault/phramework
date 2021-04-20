@@ -4,7 +4,6 @@ namespace AGerault\Framework\Services\Exceptions;
 
 use AGerault\Framework\Contracts\Services\ServiceNotFoundExceptionInterface;
 use JetBrains\PhpStorm\Pure;
-use Throwable;
 
 class ServiceNotFoundException extends \Exception implements ServiceNotFoundExceptionInterface
 {
