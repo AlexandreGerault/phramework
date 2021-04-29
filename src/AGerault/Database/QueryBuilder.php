@@ -7,6 +7,8 @@ use PDO;
 
 class QueryBuilder implements QueryBuilderInterface
 {
+    protected PDO $pdo;
+
     protected array $select = ['*'];
 
     protected string $from;
@@ -28,6 +30,16 @@ class QueryBuilder implements QueryBuilderInterface
      * @var array<string, array<string, string>>|null
      */
     protected ?array $conditions = null;
+
+    /**
+     * QueryBuilder constructor.
+     * @param PDO $pdo
+     */
+    public function __construct(PDO $pdo)
+    {
+        $this->pdo = $pdo;
+    }
+
 
     public function from(string $tableName, ?string $tableAlias = null): QueryBuilderInterface
     {
@@ -105,8 +117,10 @@ class QueryBuilder implements QueryBuilderInterface
         return $query;
     }
 
-    public function fetch(PDO $pdo): array {
-        $query = $pdo->prepare($this->toSQL());
+    public function fetch(): array
+    {
+
+        $query = $this->pdo->prepare($this->toSQL());
 
         if ($this->conditions) {
             foreach ($this->conditions as $key => $condition) {

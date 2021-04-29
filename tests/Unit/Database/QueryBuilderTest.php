@@ -1,11 +1,25 @@
 <?php
 
+use AGerault\Framework\Contracts\Database\QueryBuilderInterface;
 use AGerault\Framework\Database\QueryBuilder;
+
+function getQueryBuilder(callable $statement = null): QueryBuilderInterface
+{
+    $pdo = new PDO('sqlite::memory:');
+    $pdo->exec(
+        'CREATE TABLE IF NOT EXISTS posts (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `name` TEXT NOT NULL,`slug` TEXT);'
+    );
+    if (is_callable($statement)) {
+        $statement($pdo);
+    }
+
+    return new QueryBuilder($pdo);
+}
 
 it(
     'should be able to select a table with an alias',
     function () {
-        $query = new QueryBuilder();
+        $query = getQueryBuilder();
 
         $query->from("posts", "p");
 
@@ -16,7 +30,7 @@ it(
 it(
     'should be able to select a table without an alias',
     function () {
-        $query = new QueryBuilder();
+        $query = getQueryBuilder();
 
         $query->from("posts");
 
@@ -27,7 +41,7 @@ it(
 it(
     'should be able to order by a key',
     function () {
-        $query = new QueryBuilder();
+        $query = getQueryBuilder();
 
         $query->from("posts", "p")->orderBy("created_at", "ASC");
 
@@ -38,7 +52,7 @@ it(
 it(
     'should be able to order by multiple key',
     function () {
-        $query = new QueryBuilder();
+        $query = getQueryBuilder();
 
         $query
             ->from("posts", "p")
@@ -52,7 +66,7 @@ it(
 it(
     'should be able to limit the number of results',
     function () {
-        $query = new QueryBuilder();
+        $query = getQueryBuilder();
 
         $query->from("posts")->limit(10);
 
@@ -63,7 +77,7 @@ it(
 it(
     'should be able to offset the results',
     function () {
-        $query = new QueryBuilder();
+        $query = getQueryBuilder();
 
         $query->from("posts")->offset(3);
 
@@ -75,7 +89,7 @@ it(
 it(
     'should be able to add condition for prepared request',
     function () {
-        $query = new QueryBuilder();
+        $query = getQueryBuilder();
 
         $query->from("posts")->where('title', '=', 'Mon premier article');
 
@@ -86,17 +100,16 @@ it(
 it(
     'should be able to perform a fetch',
     function () {
-        $pdo = new PDO('sqlite::memory:');
-        $pdo->exec('CREATE TABLE IF NOT EXISTS posts (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `name` TEXT NOT NULL);');
-        $pdo->exec('INSERT INTO posts (name) VALUES (\'my titre\')');
-        $query = new QueryBuilder();
+        $query = getQueryBuilder(
+            fn(PDO $pdo) => $pdo->exec('INSERT INTO posts (name, slug) VALUES (\'my title\', \'my-title\')')
+        );
 
         $results = $query->select(['*'])
             ->from('posts')
-            ->where('name', '=', 'my titre')
-            ->fetch($pdo);
+            ->where('name', '=', 'my title')
+            ->fetch();
 
         expect($results)->toBeArray();
-        expect($results[0])->toBeArray()->toBe(['id' => '1', 'name' => 'my titre']);
+        expect($results[0])->toBeArray()->toBe(['id' => '1', 'name' => 'my title', 'slug' => 'my-title']);
     }
 );
