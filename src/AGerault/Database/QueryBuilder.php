@@ -3,10 +3,7 @@
 namespace AGerault\Framework\Database;
 
 use AGerault\Framework\Contracts\Database\QueryBuilderInterface;
-use Exception;
 use PDO;
-
-use function PHPUnit\Framework\throwException;
 
 class QueryBuilder implements QueryBuilderInterface
 {
