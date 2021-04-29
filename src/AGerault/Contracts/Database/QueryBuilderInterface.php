@@ -73,5 +73,5 @@ interface QueryBuilderInterface
      * @param array<string, string> $data An associative array where key is the column name and value is... the value
      * @return void
      */
-    public function insert(string $table, array $data): self;
+    public function insert(string $table, array $data): void;
 }

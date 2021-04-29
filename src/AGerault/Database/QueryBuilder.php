@@ -132,7 +132,7 @@ class QueryBuilder implements QueryBuilderInterface
         return $query->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function insert(string $table, array $data): self
+    public function insert(string $table, array $data): void
     {
         $columns = implode(', ', array_keys($data));
         $values = implode(', ', array_map(fn($value) => ":{$value}", array_keys($data)));
@@ -144,7 +144,5 @@ class QueryBuilder implements QueryBuilderInterface
         }
 
         $query->execute();
-
-        return $this;
     }
 }
