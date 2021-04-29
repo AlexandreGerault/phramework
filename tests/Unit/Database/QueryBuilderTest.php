@@ -113,3 +113,14 @@ it(
         expect($results[0])->toBeArray()->toBe(['id' => '1', 'name' => 'my title', 'slug' => 'my-title']);
     }
 );
+
+it(
+    'should be able to perform a prepared INSERT statement',
+    function () {
+        $query = getQueryBuilder();
+
+        $query->insert("posts", ['name' => "My title", 'slug' => 'my-title']);
+
+        expect($query->from('posts')->fetch())->toBeArray()->toHaveCount(1);
+    }
+);

@@ -131,4 +131,20 @@ class QueryBuilder implements QueryBuilderInterface
         $query->execute();
         return $query->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public function insert(string $table, array $data): self
+    {
+        $columns = implode(', ', array_keys($data));
+        $values = implode(', ', array_map(fn($value) => ":{$value}", array_keys($data)));
+        $query = $this->pdo->prepare("INSERT INTO {$table} ({$columns}) VALUES ({$values});");
+
+        foreach ($data as $key => $value)
+        {
+            $query->bindParam($key, $value);
+        }
+
+        $query->execute();
+
+        return $this;
+    }
 }

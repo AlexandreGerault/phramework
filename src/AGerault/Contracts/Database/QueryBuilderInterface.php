@@ -62,8 +62,16 @@ interface QueryBuilderInterface
     /**
      * Returns results of the query using a PDO instance
      *
-     * @param PDO $pdo
      * @return array
      */
-    public function fetch(PDO $pdo): array;
+    public function fetch(): array;
+
+    /**
+     * Insert a set of data to a row
+     *
+     * @param string $table The table name
+     * @param array<string, string> $data An associative array where key is the column name and value is... the value
+     * @return void
+     */
+    public function insert(string $table, array $data): self;
 }
