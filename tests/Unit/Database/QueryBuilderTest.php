@@ -137,3 +137,11 @@ it(
         expect($query->from('posts')->fetch())->toBeArray()->toHaveCount(0);
     }
 );
+
+it('should throw an exception if no conditions are set', function() {
+    $query = getQueryBuilder(
+        fn(PDO $pdo) => $pdo->exec('INSERT INTO posts (name, slug) VALUES (\'my title\', \'my-title\')')
+    );
+
+    $query->from('posts')->delete();
+})->throws(Exception::class);

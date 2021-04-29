@@ -3,7 +3,10 @@
 namespace AGerault\Framework\Database;
 
 use AGerault\Framework\Contracts\Database\QueryBuilderInterface;
+use Exception;
 use PDO;
+
+use function PHPUnit\Framework\throwException;
 
 class QueryBuilder implements QueryBuilderInterface
 {
@@ -146,6 +149,10 @@ class QueryBuilder implements QueryBuilderInterface
 
     public function delete(): void
     {
+        if (!$this->conditions) {
+            throw new NoConditionsBeforeDeleteException("Please provide a table name and conditions to delete rows");
+        }
+
         $conditions = implode(
             ', ',
             array_map(
