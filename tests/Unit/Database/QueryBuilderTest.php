@@ -124,3 +124,16 @@ it(
         expect($query->from('posts')->fetch())->toBeArray()->toHaveCount(1);
     }
 );
+
+it(
+    'should be able to delete rows',
+    function () {
+        $query = getQueryBuilder(
+            fn(PDO $pdo) => $pdo->exec('INSERT INTO posts (name, slug) VALUES (\'my title\', \'my-title\')')
+        );
+
+        $query->from('posts')->where('name', '=', 'my title')->delete();
+
+        expect($query->from('posts')->fetch())->toBeArray()->toHaveCount(0);
+    }
+);

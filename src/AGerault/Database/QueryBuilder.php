@@ -119,7 +119,6 @@ class QueryBuilder implements QueryBuilderInterface
 
     public function fetch(): array
     {
-
         $query = $this->pdo->prepare($this->toSQL());
 
         if ($this->conditions) {
@@ -138,9 +137,27 @@ class QueryBuilder implements QueryBuilderInterface
         $values = implode(', ', array_map(fn($value) => ":{$value}", array_keys($data)));
         $query = $this->pdo->prepare("INSERT INTO {$table} ({$columns}) VALUES ({$values});");
 
-        foreach ($data as $key => $value)
-        {
+        foreach ($data as $key => $value) {
             $query->bindParam($key, $value);
+        }
+
+        $query->execute();
+    }
+
+    public function delete(): void
+    {
+        $conditions = implode(
+            ', ',
+            array_map(
+                fn($name, $payload) => "{$name} {$payload['operator']} :{$name}",
+                array_keys($this->conditions),
+                array_values($this->conditions)
+            )
+        );
+        $query = $this->pdo->prepare("DELETE FROM {$this->from} WHERE {$conditions}");
+
+        foreach ($this->conditions as $name => $condition) {
+            $query->bindParam($name, $condition['value']);
         }
 
         $query->execute();

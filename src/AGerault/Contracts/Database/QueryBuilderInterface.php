@@ -74,4 +74,9 @@ interface QueryBuilderInterface
      * @return void
      */
     public function insert(string $table, array $data): void;
+
+    /**
+     * Delete rows that matches the query
+     */
+    public function delete(): void;
 }
