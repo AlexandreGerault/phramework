@@ -6,6 +6,9 @@ use AGerault\Framework\Contracts\Database\QueryBuilderInterface;
 
 class QueryBuilder implements QueryBuilderInterface
 {
+    /**
+     * @var string[]
+     */
     protected array $select = ['*'];
 
     protected string $from;
@@ -28,6 +31,9 @@ class QueryBuilder implements QueryBuilderInterface
      */
     protected ?array $conditions = null;
 
+    /**
+     * @var array<string, string>|null
+     */
     protected ?array $insertData = null;
 
     protected string $action = "select";
