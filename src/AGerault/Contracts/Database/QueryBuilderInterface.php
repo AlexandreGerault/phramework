@@ -64,19 +64,19 @@ interface QueryBuilderInterface
      *
      * @return array
      */
-    public function fetch(): array;
+    // public function fetch(): array;
 
     /**
      * Insert a set of data to a row
      *
-     * @param string $table The table name
      * @param array<string, string> $data An associative array where key is the column name and value is... the value
-     * @return void
+     * @return QueryBuilderInterface
      */
-    public function insert(string $table, array $data): void;
+    public function insert(array $data): self;
 
     /**
      * Delete rows that matches the query
+     * @return QueryBuilderInterface
      */
-    public function delete(): void;
+    public function delete(): self;
 }

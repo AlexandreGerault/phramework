@@ -3,12 +3,9 @@
 namespace AGerault\Framework\Database;
 
 use AGerault\Framework\Contracts\Database\QueryBuilderInterface;
-use PDO;
 
 class QueryBuilder implements QueryBuilderInterface
 {
-    protected PDO $pdo;
-
     protected array $select = ['*'];
 
     protected string $from;
@@ -31,15 +28,9 @@ class QueryBuilder implements QueryBuilderInterface
      */
     protected ?array $conditions = null;
 
-    /**
-     * QueryBuilder constructor.
-     * @param PDO $pdo
-     */
-    public function __construct(PDO $pdo)
-    {
-        $this->pdo = $pdo;
-    }
+    protected ?array $insertData = null;
 
+    protected string $action = "select";
 
     public function from(string $tableName, ?string $tableAlias = null): QueryBuilderInterface
     {
@@ -85,7 +76,35 @@ class QueryBuilder implements QueryBuilderInterface
         return $this;
     }
 
+    /**
+     * @throws NoDataForInsertException
+     * @throws NoConditionsBeforeDeleteException
+     * @throws UnsupportedSqlActionException
+     */
     public function toSQL(): string
+    {
+        return match ($this->action) {
+            "select" => $this->buildSelectQuery(),
+            "insert" => $this->buildInsertQuery(),
+            "delete" => $this->buildDeleteQuery(),
+            default => throw new UnsupportedSqlActionException("Unhandled SQL action")
+        };
+    }
+
+    public function insert(array $data): self
+    {
+        $this->action = "insert";
+        $this->insertData = $data;
+        return $this;
+    }
+
+    public function delete(): self
+    {
+        $this->action = "delete";
+        return $this;
+    }
+
+    private function buildSelectQuery(): string
     {
         $select = implode(', ', $this->select);
         $query = "SELECT {$select} FROM {$this->from}";
@@ -117,37 +136,28 @@ class QueryBuilder implements QueryBuilderInterface
         return $query;
     }
 
-    public function fetch(): array
+    /**
+     * @throws NoDataForInsertException
+     */
+    private function buildInsertQuery(): string
     {
-        $query = $this->pdo->prepare($this->toSQL());
-
-        if ($this->conditions) {
-            foreach ($this->conditions as $key => $condition) {
-                $query->bindParam($key, $condition['value']);
-            }
+        if (!$this->insertData) {
+            throw new NoDataForInsertException('No data provided for insertion');
         }
 
-        $query->execute();
-        return $query->fetchAll(PDO::FETCH_ASSOC);
+        $columns = implode(', ', array_keys($this->insertData));
+        $values = implode(', ', array_map(fn($value) => ":{$value}", array_keys($this->insertData)));
+
+        return "INSERT INTO {$this->from} ({$columns}) VALUES ({$values});";
     }
 
-    public function insert(string $table, array $data): void
-    {
-        $columns = implode(', ', array_keys($data));
-        $values = implode(', ', array_map(fn($value) => ":{$value}", array_keys($data)));
-        $query = $this->pdo->prepare("INSERT INTO {$table} ({$columns}) VALUES ({$values});");
-
-        foreach ($data as $key => $value) {
-            $query->bindParam($key, $value);
-        }
-
-        $query->execute();
-    }
-
-    public function delete(): void
+    /**
+     * @throws NoConditionsBeforeDeleteException
+     */
+    private function buildDeleteQuery(): string
     {
         if (!$this->conditions) {
-            throw new NoConditionsBeforeDeleteException("Please provide a table name and conditions to delete rows");
+            throw new NoConditionsBeforeDeleteException("Please provide conditions to delete rows");
         }
 
         $conditions = implode(
@@ -158,12 +168,7 @@ class QueryBuilder implements QueryBuilderInterface
                 array_values($this->conditions)
             )
         );
-        $query = $this->pdo->prepare("DELETE FROM {$this->from} WHERE {$conditions}");
 
-        foreach ($this->conditions as $name => $condition) {
-            $query->bindParam($name, $condition['value']);
-        }
-
-        $query->execute();
+        return "DELETE FROM {$this->from} WHERE {$conditions}";
     }
 }

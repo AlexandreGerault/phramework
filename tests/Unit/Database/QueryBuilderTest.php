@@ -2,18 +2,11 @@
 
 use AGerault\Framework\Contracts\Database\QueryBuilderInterface;
 use AGerault\Framework\Database\QueryBuilder;
+use JetBrains\PhpStorm\Pure;
 
-function getQueryBuilder(callable $statement = null): QueryBuilderInterface
+#[Pure] function getQueryBuilder(): QueryBuilderInterface
 {
-    $pdo = new PDO('sqlite::memory:');
-    $pdo->exec(
-        'CREATE TABLE IF NOT EXISTS posts (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `name` TEXT NOT NULL,`slug` TEXT);'
-    );
-    if (is_callable($statement)) {
-        $statement($pdo);
-    }
-
-    return new QueryBuilder($pdo);
+    return new QueryBuilder();
 }
 
 it(
@@ -98,50 +91,43 @@ it(
 );
 
 it(
-    'should be able to perform a fetch',
-    function () {
-        $query = getQueryBuilder(
-            fn(PDO $pdo) => $pdo->exec('INSERT INTO posts (name, slug) VALUES (\'my title\', \'my-title\')')
-        );
-
-        $results = $query->select(['*'])
-            ->from('posts')
-            ->where('name', '=', 'my title')
-            ->fetch();
-
-        expect($results)->toBeArray();
-        expect($results[0])->toBeArray()->toBe(['id' => '1', 'name' => 'my title', 'slug' => 'my-title']);
-    }
-);
-
-it(
     'should be able to perform a prepared INSERT statement',
     function () {
         $query = getQueryBuilder();
 
-        $query->insert("posts", ['name' => "My title", 'slug' => 'my-title']);
+        $query->insert(['name' => "My title", 'slug' => 'my-title'])->from('posts');
 
-        expect($query->from('posts')->fetch())->toBeArray()->toHaveCount(1);
+        expect($query->from('posts')->toSQL())->toBeString()->toBe("INSERT INTO posts (name, slug) VALUES (:name, :slug);");
     }
 );
 
 it(
     'should be able to delete rows',
     function () {
-        $query = getQueryBuilder(
-            fn(PDO $pdo) => $pdo->exec('INSERT INTO posts (name, slug) VALUES (\'my title\', \'my-title\')')
-        );
+        $query = getQueryBuilder();
 
         $query->from('posts')->where('name', '=', 'my title')->delete();
 
-        expect($query->from('posts')->fetch())->toBeArray()->toHaveCount(0);
+        expect($query->from('posts')->toSQL())->toBeString()->toBe("DELETE FROM posts WHERE name = :name");
+    }
+);
+
+it(
+    'should be able to delete rows with multiple conditions',
+    function () {
+        $query = getQueryBuilder();
+
+        $query->from('posts')
+            ->where('name', '=', 'my title')
+            ->where('slug', '=', 'my-title')
+            ->delete();
+
+        expect($query->from('posts')->toSQL())->toBeString()->toBe("DELETE FROM posts WHERE name = :name, slug = :slug");
     }
 );
 
 it('should throw an exception if no conditions are set', function() {
-    $query = getQueryBuilder(
-        fn(PDO $pdo) => $pdo->exec('INSERT INTO posts (name, slug) VALUES (\'my title\', \'my-title\')')
-    );
+    $query = getQueryBuilder();
 
-    $query->from('posts')->delete();
+    $query->from('posts')->delete()->toSQL();
 })->throws(Exception::class);
