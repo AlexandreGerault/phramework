@@ -89,7 +89,7 @@ class QueryBuilder implements QueryBuilderInterface
     }
 
     /**
-     * @throws NoDataForInsertException
+     * @throws NoDataProvidedException
      * @throws NoConditionsBeforeDeleteException
      * @throws UnsupportedSqlActionException
      */
@@ -150,12 +150,12 @@ class QueryBuilder implements QueryBuilderInterface
     }
 
     /**
-     * @throws NoDataForInsertException
+     * @throws NoDataProvidedException
      */
     private function buildInsertQuery(): string
     {
         if (!$this->insertData) {
-            throw new NoDataForInsertException('No data provided for insertion');
+            throw new NoDataProvidedException('No data provided for insertion');
         }
 
         $columns = implode(', ', array_keys($this->insertData));
@@ -196,10 +196,13 @@ class QueryBuilder implements QueryBuilderInterface
         return $this;
     }
 
+    /**
+     * @throws NoDataProvidedException
+     */
     private function buildUpdateQuery(): string
     {
         if (!$this->updateData) {
-            return '';
+            throw new NoDataProvidedException('No data provided for update');
         }
 
         $columns = implode(', ', array_map(fn($key) => "{$key} = :{$key}", array_keys($this->updateData)));

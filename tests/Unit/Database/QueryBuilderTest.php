@@ -1,6 +1,7 @@
 <?php
 
 use AGerault\Framework\Contracts\Database\QueryBuilderInterface;
+use AGerault\Framework\Database\NoDataProvidedException;
 use AGerault\Framework\Database\QueryBuilder;
 use JetBrains\PhpStorm\Pure;
 
@@ -31,13 +32,16 @@ it(
     }
 );
 
-it('should be able to specify select columns', function() {
-    $query = getQueryBuilder();
+it(
+    'should be able to specify select columns',
+    function () {
+        $query = getQueryBuilder();
 
-    $query->select(['title'])->from('posts');
+        $query->select(['title'])->from('posts');
 
-    expect($query->toSQL())->toBeString()->toBe('SELECT title FROM posts');
-});
+        expect($query->toSQL())->toBeString()->toBe('SELECT title FROM posts');
+    }
+);
 
 it(
     'should be able to order by a key',
@@ -112,6 +116,15 @@ it(
 );
 
 it(
+    'should throw an exception if no insert data are provided',
+    function () {
+        $query = getQueryBuilder();
+
+        $query->insert([])->toSQL();
+    }
+)->throws(NoDataProvidedException::class);
+
+it(
     'should be able to delete rows',
     function () {
         $query = getQueryBuilder();
@@ -169,7 +182,9 @@ it(
             ->where('title', '=', 'title')
             ->toSql();
 
-        expect($query->toSQL())->toBeString()->toBe('UPDATE posts SET title = :title, slug = :slug WHERE title = :title');
+        expect($query->toSQL())->toBeString()->toBe(
+            'UPDATE posts SET title = :title, slug = :slug WHERE title = :title'
+        );
     }
 );
 
@@ -190,3 +205,9 @@ it(
             ->toBe('UPDATE posts SET title = :title, slug = :slug WHERE title = :title, slug = :slug');
     }
 );
+
+it('should throw an exception if no data are provided for an update statement', function () {
+    $query = getQueryBuilder();
+
+    $query->update([])->toSQL();
+})->throws(NoDataProvidedException::class);

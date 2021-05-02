@@ -4,6 +4,6 @@ namespace AGerault\Framework\Database;
 
 use Exception;
 
-class NoDataForInsertException extends Exception
+class NoDataProvidedException extends Exception
 {
 }
