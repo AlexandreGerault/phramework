@@ -79,4 +79,10 @@ interface QueryBuilderInterface
      * @return QueryBuilderInterface
      */
     public function delete(): self;
+
+    /**
+     * @param array<string, string> $data
+     * @return $this
+     */
+    public function update(array $data): self;
 }

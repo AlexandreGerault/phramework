@@ -36,6 +36,11 @@ class QueryBuilder implements QueryBuilderInterface
      */
     protected ?array $insertData = null;
 
+    /**
+     * @var array<string, string>|null
+     */
+    protected ?array $updateData = null;
+
     protected string $action = "select";
 
     public function from(string $tableName, ?string $tableAlias = null): QueryBuilderInterface
@@ -92,6 +97,7 @@ class QueryBuilder implements QueryBuilderInterface
         return match ($this->action) {
             "select" => $this->buildSelectQuery(),
             "insert" => $this->buildInsertQuery(),
+            "update" => $this->buildUpdateQuery(),
             "delete" => $this->buildDeleteQuery(),
             default => throw new UnsupportedSqlActionException("Unhandled SQL action")
         };
@@ -176,5 +182,42 @@ class QueryBuilder implements QueryBuilderInterface
         );
 
         return "DELETE FROM {$this->from} WHERE {$conditions}";
+    }
+
+    /**
+     * @param array<string, string> $data
+     * @return QueryBuilderInterface
+     */
+    public function update(array $data): QueryBuilderInterface
+    {
+        $this->action = "update";
+        $this->updateData = $data;
+        return $this;
+    }
+
+    private function buildUpdateQuery(): string
+    {
+        if (!$this->updateData) {
+            return '';
+        }
+
+        $columns = implode(', ', array_map(fn($key) => "{$key} = :{$key}", array_keys($this->updateData)));
+
+        $query = "UPDATE {$this->from} SET {$columns}";
+
+        if ($this->conditions) {
+            $conditions = implode(
+                ', ',
+                array_map(
+                    fn($name, $payload) => "{$name} {$payload['operator']} :{$name}",
+                    array_keys($this->conditions),
+                    array_values($this->conditions)
+                )
+            );
+
+            $query .= " WHERE {$conditions}";
+        }
+
+        return $query;
     }
 }

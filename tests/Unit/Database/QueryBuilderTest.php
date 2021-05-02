@@ -97,7 +97,9 @@ it(
 
         $query->insert(['name' => "My title", 'slug' => 'my-title'])->from('posts');
 
-        expect($query->from('posts')->toSQL())->toBeString()->toBe("INSERT INTO posts (name, slug) VALUES (:name, :slug);");
+        expect($query->from('posts')->toSQL())->toBeString()->toBe(
+            "INSERT INTO posts (name, slug) VALUES (:name, :slug);"
+        );
     }
 );
 
@@ -122,12 +124,28 @@ it(
             ->where('slug', '=', 'my-title')
             ->delete();
 
-        expect($query->from('posts')->toSQL())->toBeString()->toBe("DELETE FROM posts WHERE name = :name, slug = :slug");
+        expect($query->from('posts')->toSQL())->toBeString()->toBe(
+            "DELETE FROM posts WHERE name = :name, slug = :slug"
+        );
     }
 );
 
-it('should throw an exception if no conditions are set', function() {
-    $query = getQueryBuilder();
+it(
+    'should throw an exception if no conditions are set',
+    function () {
+        $query = getQueryBuilder();
 
-    $query->from('posts')->delete()->toSQL();
-})->throws(Exception::class);
+        $query->from('posts')->delete()->toSQL();
+    }
+)->throws(Exception::class);
+
+it(
+    'should be able to update rows',
+    function () {
+        $query = getQueryBuilder();
+
+        $query->from('posts')->update(["title" => "New title", "slug" => "new-title"]);
+
+        expect($query->toSQL())->toBeString()->toBe("UPDATE posts SET title = :title, slug = :slug");
+    }
+);
