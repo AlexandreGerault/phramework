@@ -63,6 +63,7 @@ class QueryBuilder implements QueryBuilderInterface
 
     public function select(array $columns): QueryBuilderInterface
     {
+        $this->select = $columns;
         return $this;
     }
 

@@ -31,6 +31,14 @@ it(
     }
 );
 
+it('should be able to specify select columns', function() {
+    $query = getQueryBuilder();
+
+    $query->select(['title'])->from('posts');
+
+    expect($query->toSQL())->toBeString()->toBe('SELECT title FROM posts');
+});
+
 it(
     'should be able to order by a key',
     function () {
