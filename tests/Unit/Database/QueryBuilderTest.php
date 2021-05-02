@@ -149,3 +149,18 @@ it(
         expect($query->toSQL())->toBeString()->toBe("UPDATE posts SET title = :title, slug = :slug");
     }
 );
+
+it(
+    'should be able to update rows with one condition',
+    function () {
+        $query = getQueryBuilder();
+
+        $query
+            ->from('posts')
+            ->update(["title" => "New title", "slug" => "new-title"])
+            ->where('title', '=', 'title')
+            ->toSql();
+
+        expect($query->toSQL())->toBeString()->toBe('UPDATE posts SET title = :title, slug = :slug WHERE title = :title');
+    }
+);
