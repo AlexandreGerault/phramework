@@ -44,6 +44,12 @@ class QueryBuilder implements QueryBuilderInterface
 
     protected string $action = 'select';
 
+    protected ?string $joinTable = null;
+
+    protected ?string $joinTableAlias = null;
+
+    protected ?string $joinCondition = null;
+
     public function from(string $tableName, ?string $tableAlias = null): QueryBuilderInterface
     {
         $this->from = $tableName;
@@ -97,12 +103,20 @@ class QueryBuilder implements QueryBuilderInterface
      */
     public function toSQL(): string
     {
-        return match ($this->action) {
+        $query = match ($this->action) {
             'select' => $this->buildSelectQuery(),
             'insert' => $this->buildInsertQuery(),
             'update' => $this->buildUpdateQuery(),
             'delete' => $this->buildDeleteQuery(),
             default => throw new UnsupportedSqlActionException('Unhandled SQL action') };
+
+        if ('insert' === $this->action) {
+            return $query;
+        }
+
+        $query = $this->appendInnerJoin($query);
+
+        return $this->appendConditions($query);
     }
 
     public function insert(array $data): self
@@ -127,13 +141,6 @@ class QueryBuilder implements QueryBuilderInterface
 
         if ($this->fromAlias) {
             $query .= " {$this->fromAlias}";
-        }
-
-        if ($this->conditions) {
-            $query .= ' WHERE';
-            foreach ($this->conditions as $key => $condition) {
-                $query .= " {$key} {$condition['operator']} :{$key}";
-            }
         }
 
         if ($this->orders) {
@@ -176,16 +183,7 @@ class QueryBuilder implements QueryBuilderInterface
             throw new NoConditionsBeforeDeleteException('Please provide conditions to delete rows');
         }
 
-        $conditions = implode(
-            ', ',
-            array_map(
-                fn ($name, $payload) => "{$name} {$payload['operator']} :{$name}",
-                array_keys($this->conditions),
-                array_values($this->conditions)
-            )
-        );
-
-        return "DELETE FROM {$this->from} WHERE {$conditions}";
+        return "DELETE FROM {$this->from}";
     }
 
     /**
@@ -210,8 +208,45 @@ class QueryBuilder implements QueryBuilderInterface
 
         $columns = implode(', ', array_map(fn ($key) => "{$key} = :{$key}", array_keys($this->updateData)));
 
-        $query = "UPDATE {$this->from} SET {$columns}";
+        return "UPDATE {$this->from} SET {$columns}";
+    }
 
+    public function innerJoin(string $table, ?string $alias = null): QueryBuilderInterface
+    {
+        $this->joinTable = $table;
+        if ($alias) {
+            $this->joinTableAlias = $alias;
+        }
+
+        return $this;
+    }
+
+    public function on(string $left, string $right): QueryBuilderInterface
+    {
+        $this->joinCondition = "{$left} = {$right}";
+
+        return $this;
+    }
+
+    private function appendInnerJoin(string $query): string
+    {
+        if (!$this->joinTable || !$this->joinCondition) {
+            return $query;
+        }
+
+        $query .= " INNER JOIN {$this->joinTable}";
+
+        if ($this->joinTableAlias) {
+            $query .= " {$this->joinTableAlias}";
+        }
+
+        $query .= " ON {$this->joinCondition}";
+
+        return $query;
+    }
+
+    private function appendConditions(string $query): string
+    {
         if ($this->conditions) {
             $conditions = implode(
                 ', ',

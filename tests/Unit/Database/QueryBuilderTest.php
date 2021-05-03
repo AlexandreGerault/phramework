@@ -205,8 +205,27 @@ it(
     }
 );
 
-it('should throw an exception if no data are provided for an update statement', function () {
-    $query = getQueryBuilder();
+it(
+    'should throw an exception if no data are provided for an update statement',
+    function () {
+        $query = getQueryBuilder();
 
-    $query->update([])->toSQL();
-})->throws(NoDataProvidedException::class);
+        $query->update([])->toSQL();
+    }
+)->throws(NoDataProvidedException::class);
+
+it(
+    'should be able to write an inner join statement',
+    function () {
+        $query = getQueryBuilder();
+
+        $query->select(['title'])
+            ->from('posts', 'p')
+            ->innerJoin('authors', 'a')
+            ->on('p.author_id', 'a.id');
+
+        expect($query->toSQL())
+            ->toBeString()
+            ->toBe('SELECT title FROM posts p INNER JOIN authors a ON p.author_id = a.id');
+    }
+);

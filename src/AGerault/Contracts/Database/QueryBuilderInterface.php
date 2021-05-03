@@ -9,8 +9,6 @@ interface QueryBuilderInterface
     /**
      * Select the table to perform the query on.
      *
-     * @param string $tableName
-     * @param string|null $tableAlias
      * @return QueryBuilderInterface
      */
     public function from(string $tableName, ?string $tableAlias = null): self;
@@ -27,7 +25,6 @@ interface QueryBuilderInterface
     /**
      * Specify the amount of results to fetch.
      *
-     * @param int $amount
      * @return QueryBuilderInterface
      */
     public function limit(int $amount): self;
@@ -35,7 +32,6 @@ interface QueryBuilderInterface
     /**
      * Specify the amount of results to skip.
      *
-     * @param int $offset
      * @return QueryBuilderInterface
      */
     public function offset(int $offset): self;
@@ -86,4 +82,18 @@ interface QueryBuilderInterface
      * @return $this
      */
     public function update(array $data): self;
+
+    /**
+     * Init an inner join statement, but not the join condition. See QueryBuilderInterface::on for joining condition.
+     *
+     * @return $this
+     */
+    public function innerJoin(string $table, ?string $alias = null): self;
+
+    /**
+     * Add a joining condition.
+     *
+     * @return $this
+     */
+    public function on(string $left, string $right): self;
 }
