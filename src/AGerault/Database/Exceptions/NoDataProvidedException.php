@@ -1,6 +1,6 @@
 <?php
 
-namespace AGerault\Framework\Database;
+namespace AGerault\Framework\Database\Exceptions;
 
 use Exception;
 

@@ -1,7 +1,7 @@
 <?php
 
 use AGerault\Framework\Contracts\Database\QueryBuilderInterface;
-use AGerault\Framework\Database\NoDataProvidedException;
+use AGerault\Framework\Database\Exceptions\NoDataProvidedException;
 use AGerault\Framework\Database\QueryBuilder;
 use JetBrains\PhpStorm\Pure;
 
