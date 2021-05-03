@@ -102,16 +102,15 @@ class QueryBuilder implements QueryBuilderInterface
     /**
      * @throws NoDataProvidedException
      * @throws NoConditionsBeforeDeleteException
-     * @throws UnsupportedSqlActionException
      */
     public function toSQL(): string
     {
         $query = match ($this->action) {
-            'select' => $this->buildSelectQuery(),
             'insert' => $this->buildInsertQuery(),
             'update' => $this->buildUpdateQuery(),
             'delete' => $this->buildDeleteQuery(),
-            default => throw new UnsupportedSqlActionException('Unhandled SQL action') };
+            default => $this->buildSelectQuery()
+        };
 
         if ('insert' === $this->action) {
             return $query;
