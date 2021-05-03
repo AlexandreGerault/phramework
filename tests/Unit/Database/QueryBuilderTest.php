@@ -15,9 +15,9 @@ it(
     function () {
         $query = getQueryBuilder();
 
-        $query->from("posts", "p");
+        $query->from('posts', 'p');
 
-        expect($query->toSQL())->toBeString()->toBe("SELECT * FROM posts p");
+        expect($query->toSQL())->toBeString()->toBe('SELECT * FROM posts p');
     }
 );
 
@@ -26,9 +26,9 @@ it(
     function () {
         $query = getQueryBuilder();
 
-        $query->from("posts");
+        $query->from('posts');
 
-        expect($query->toSQL())->toBeString()->toBe("SELECT * FROM posts");
+        expect($query->toSQL())->toBeString()->toBe('SELECT * FROM posts');
     }
 );
 
@@ -48,9 +48,9 @@ it(
     function () {
         $query = getQueryBuilder();
 
-        $query->from("posts", "p")->orderBy("created_at", "ASC");
+        $query->from('posts', 'p')->orderBy('created_at', 'ASC');
 
-        expect($query->toSQL())->toBeString()->toBe("SELECT * FROM posts p ORDER BY created_at ASC");
+        expect($query->toSQL())->toBeString()->toBe('SELECT * FROM posts p ORDER BY created_at ASC');
     }
 );
 
@@ -60,11 +60,11 @@ it(
         $query = getQueryBuilder();
 
         $query
-            ->from("posts", "p")
-            ->orderBy("created_at", "ASC")
-            ->orderBy("updated_at", "ASC");
+            ->from('posts', 'p')
+            ->orderBy('created_at', 'ASC')
+            ->orderBy('updated_at', 'ASC');
 
-        expect($query->toSQL())->toBeString()->toBe("SELECT * FROM posts p ORDER BY created_at, updated_at ASC");
+        expect($query->toSQL())->toBeString()->toBe('SELECT * FROM posts p ORDER BY created_at, updated_at ASC');
     }
 );
 
@@ -73,9 +73,9 @@ it(
     function () {
         $query = getQueryBuilder();
 
-        $query->from("posts")->limit(10);
+        $query->from('posts')->limit(10);
 
-        expect($query->toSQL())->toBeString()->toBe("SELECT * FROM posts LIMIT 10");
+        expect($query->toSQL())->toBeString()->toBe('SELECT * FROM posts LIMIT 10');
     }
 );
 
@@ -84,21 +84,20 @@ it(
     function () {
         $query = getQueryBuilder();
 
-        $query->from("posts")->offset(3);
+        $query->from('posts')->offset(3);
 
-        expect($query->toSQL())->toBeString()->toBe("SELECT * FROM posts OFFSET 3");
+        expect($query->toSQL())->toBeString()->toBe('SELECT * FROM posts OFFSET 3');
     }
 );
-
 
 it(
     'should be able to add condition for prepared request',
     function () {
         $query = getQueryBuilder();
 
-        $query->from("posts")->where('title', '=', 'Mon premier article');
+        $query->from('posts')->where('title', '=', 'Mon premier article');
 
-        expect($query->toSQL())->toBeString()->toBe("SELECT * FROM posts WHERE title = :title");
+        expect($query->toSQL())->toBeString()->toBe('SELECT * FROM posts WHERE title = :title');
     }
 );
 
@@ -107,10 +106,10 @@ it(
     function () {
         $query = getQueryBuilder();
 
-        $query->insert(['name' => "My title", 'slug' => 'my-title'])->from('posts');
+        $query->insert(['name' => 'My title', 'slug' => 'my-title'])->from('posts');
 
         expect($query->from('posts')->toSQL())->toBeString()->toBe(
-            "INSERT INTO posts (name, slug) VALUES (:name, :slug);"
+            'INSERT INTO posts (name, slug) VALUES (:name, :slug);'
         );
     }
 );
@@ -131,7 +130,7 @@ it(
 
         $query->from('posts')->where('name', '=', 'my title')->delete();
 
-        expect($query->from('posts')->toSQL())->toBeString()->toBe("DELETE FROM posts WHERE name = :name");
+        expect($query->from('posts')->toSQL())->toBeString()->toBe('DELETE FROM posts WHERE name = :name');
     }
 );
 
@@ -146,7 +145,7 @@ it(
             ->delete();
 
         expect($query->from('posts')->toSQL())->toBeString()->toBe(
-            "DELETE FROM posts WHERE name = :name, slug = :slug"
+            'DELETE FROM posts WHERE name = :name, slug = :slug'
         );
     }
 );
@@ -165,9 +164,9 @@ it(
     function () {
         $query = getQueryBuilder();
 
-        $query->from('posts')->update(["title" => "New title", "slug" => "new-title"]);
+        $query->from('posts')->update(['title' => 'New title', 'slug' => 'new-title']);
 
-        expect($query->toSQL())->toBeString()->toBe("UPDATE posts SET title = :title, slug = :slug");
+        expect($query->toSQL())->toBeString()->toBe('UPDATE posts SET title = :title, slug = :slug');
     }
 );
 
@@ -178,7 +177,7 @@ it(
 
         $query
             ->from('posts')
-            ->update(["title" => "New title", "slug" => "new-title"])
+            ->update(['title' => 'New title', 'slug' => 'new-title'])
             ->where('title', '=', 'title')
             ->toSql();
 
@@ -195,7 +194,7 @@ it(
 
         $query
             ->from('posts')
-            ->update(["title" => "New title", "slug" => "new-title"])
+            ->update(['title' => 'New title', 'slug' => 'new-title'])
             ->where('title', '=', 'title')
             ->where('slug', '=', 'my-title')
             ->toSql();

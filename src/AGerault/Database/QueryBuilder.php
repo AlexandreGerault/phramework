@@ -26,7 +26,8 @@ class QueryBuilder implements QueryBuilderInterface
 
     /**
      * Array of conditions where each line is a condition stored like
-     * [KEY => [OPERATOR, VALUE]]
+     * [KEY => [OPERATOR, VALUE]].
+     *
      * @var array<string, array<string, string>>|null
      */
     protected ?array $conditions = null;
@@ -41,7 +42,7 @@ class QueryBuilder implements QueryBuilderInterface
      */
     protected ?array $updateData = null;
 
-    protected string $action = "select";
+    protected string $action = 'select';
 
     public function from(string $tableName, ?string $tableAlias = null): QueryBuilderInterface
     {
@@ -64,6 +65,7 @@ class QueryBuilder implements QueryBuilderInterface
     public function select(array $columns): QueryBuilderInterface
     {
         $this->select = $columns;
+
         return $this;
     }
 
@@ -96,24 +98,25 @@ class QueryBuilder implements QueryBuilderInterface
     public function toSQL(): string
     {
         return match ($this->action) {
-            "select" => $this->buildSelectQuery(),
-            "insert" => $this->buildInsertQuery(),
-            "update" => $this->buildUpdateQuery(),
-            "delete" => $this->buildDeleteQuery(),
-            default => throw new UnsupportedSqlActionException("Unhandled SQL action")
-        };
+            'select' => $this->buildSelectQuery(),
+            'insert' => $this->buildInsertQuery(),
+            'update' => $this->buildUpdateQuery(),
+            'delete' => $this->buildDeleteQuery(),
+            default => throw new UnsupportedSqlActionException('Unhandled SQL action') };
     }
 
     public function insert(array $data): self
     {
-        $this->action = "insert";
+        $this->action = 'insert';
         $this->insertData = $data;
+
         return $this;
     }
 
     public function delete(): self
     {
-        $this->action = "delete";
+        $this->action = 'delete';
+
         return $this;
     }
 
@@ -127,7 +130,7 @@ class QueryBuilder implements QueryBuilderInterface
         }
 
         if ($this->conditions) {
-            $query .= " WHERE";
+            $query .= ' WHERE';
             foreach ($this->conditions as $key => $condition) {
                 $query .= " {$key} {$condition['operator']} :{$key}";
             }
@@ -159,7 +162,7 @@ class QueryBuilder implements QueryBuilderInterface
         }
 
         $columns = implode(', ', array_keys($this->insertData));
-        $values = implode(', ', array_map(fn($value) => ":{$value}", array_keys($this->insertData)));
+        $values = implode(', ', array_map(fn ($value) => ":{$value}", array_keys($this->insertData)));
 
         return "INSERT INTO {$this->from} ({$columns}) VALUES ({$values});";
     }
@@ -170,13 +173,13 @@ class QueryBuilder implements QueryBuilderInterface
     private function buildDeleteQuery(): string
     {
         if (!$this->conditions) {
-            throw new NoConditionsBeforeDeleteException("Please provide conditions to delete rows");
+            throw new NoConditionsBeforeDeleteException('Please provide conditions to delete rows');
         }
 
         $conditions = implode(
             ', ',
             array_map(
-                fn($name, $payload) => "{$name} {$payload['operator']} :{$name}",
+                fn ($name, $payload) => "{$name} {$payload['operator']} :{$name}",
                 array_keys($this->conditions),
                 array_values($this->conditions)
             )
@@ -187,12 +190,12 @@ class QueryBuilder implements QueryBuilderInterface
 
     /**
      * @param array<string, string> $data
-     * @return QueryBuilderInterface
      */
     public function update(array $data): QueryBuilderInterface
     {
-        $this->action = "update";
+        $this->action = 'update';
         $this->updateData = $data;
+
         return $this;
     }
 
@@ -205,7 +208,7 @@ class QueryBuilder implements QueryBuilderInterface
             throw new NoDataProvidedException('No data provided for update');
         }
 
-        $columns = implode(', ', array_map(fn($key) => "{$key} = :{$key}", array_keys($this->updateData)));
+        $columns = implode(', ', array_map(fn ($key) => "{$key} = :{$key}", array_keys($this->updateData)));
 
         $query = "UPDATE {$this->from} SET {$columns}";
 
@@ -213,7 +216,7 @@ class QueryBuilder implements QueryBuilderInterface
             $conditions = implode(
                 ', ',
                 array_map(
-                    fn($name, $payload) => "{$name} {$payload['operator']} :{$name}",
+                    fn ($name, $payload) => "{$name} {$payload['operator']} :{$name}",
                     array_keys($this->conditions),
                     array_values($this->conditions)
                 )
