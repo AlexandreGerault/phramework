@@ -8,8 +8,11 @@ it(
     'should throw an exception if it use a wrong HTTP verb',
     function () {
         new Route(
-            '/', 'name', 'BLABLA', function () {
-        }
+            '/',
+            'name',
+            'BLABLA',
+            function () {
+            }
         );
     }
 )->throws(HttpVerbNotAllowedException::class);
@@ -25,9 +28,12 @@ it(
     'should be able to execute the callback if it is a closure',
     function () {
         $route = new Route(
-            '/', 'name', 'GET', function () {
-            return "Working closure";
-        }
+            '/',
+            'name',
+            'GET',
+            function () {
+                return "Working closure";
+            }
         );
 
         $action = $route->callback();

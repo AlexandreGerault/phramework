@@ -1,8 +1,6 @@
 <?php
 
-
 namespace AGerault\Framework\Routing;
-
 
 use AGerault\Framework\Contracts\Routing\RouteCollectionInterface;
 use AGerault\Framework\Contracts\Routing\RouteInterface;

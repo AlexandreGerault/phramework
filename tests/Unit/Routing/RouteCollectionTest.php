@@ -3,7 +3,7 @@
 use AGerault\Framework\Routing\RouteCollection;
 use Test\Fixtures\Routing\MockedRoute;
 
-it('should increase the routes number after registering one',function() {
+it('should increase the routes number after registering one', function () {
     $collection = new RouteCollection();
     $route = new MockedRoute();
 

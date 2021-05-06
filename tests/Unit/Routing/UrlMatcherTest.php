@@ -197,7 +197,7 @@ it(
             }
         };
 
-        $collection = new class($route) implements RouteCollectionInterface {
+        $collection = new class ($route) implements RouteCollectionInterface {
             private array $routes = [];
 
             /**
@@ -225,7 +225,7 @@ it(
     }
 );
 
-it('should throw an exception if no route matches', function() {
+it('should throw an exception if no route matches', function () {
     $matcher = new UrlMatcher(new class implements RouteCollectionInterface {
         public function registerRoute(RouteInterface $route): void
         {

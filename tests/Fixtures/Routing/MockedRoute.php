@@ -13,7 +13,8 @@ class MockedRoute implements RouteInterface
 
     public function callback(): callable
     {
-        return function () {};
+        return function () {
+        };
     }
 
     public function method(): string
