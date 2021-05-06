@@ -46,7 +46,7 @@ interface QueryBuilderInterface
     /**
      * @return $this
      */
-    public function where(string $key, string $operator, string $value): self;
+    public function where(string $key, string $operator, ?string $value = null): self;
 
     /**
      * Return the built query as a SQL query.

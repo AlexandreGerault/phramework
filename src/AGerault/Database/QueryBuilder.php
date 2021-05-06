@@ -5,7 +5,6 @@ namespace AGerault\Framework\Database;
 use AGerault\Framework\Contracts\Database\QueryBuilderInterface;
 use AGerault\Framework\Database\Exceptions\NoConditionsBeforeDeleteException;
 use AGerault\Framework\Database\Exceptions\NoDataProvidedException;
-use AGerault\Framework\Database\Exceptions\UnsupportedSqlActionException;
 
 class QueryBuilder implements QueryBuilderInterface
 {
@@ -92,7 +91,7 @@ class QueryBuilder implements QueryBuilderInterface
         return $this;
     }
 
-    public function where(string $key, string $operator, string $value): QueryBuilderInterface
+    public function where(string $key, string $operator, ?string $value = null): QueryBuilderInterface
     {
         $this->conditions[$key] = ['operator' => $operator, 'value' => $value];
 
@@ -253,7 +252,10 @@ class QueryBuilder implements QueryBuilderInterface
             $conditions = implode(
                 ', ',
                 array_map(
-                    fn ($name, $payload) => "{$name} {$payload['operator']} :{$name}",
+                    function ($name, $payload) {
+                        $value = $payload['value'] ?? ":{$name}";
+                        return "{$name} {$payload['operator']} {$value}";
+                    },
                     array_keys($this->conditions),
                     array_values($this->conditions)
                 )

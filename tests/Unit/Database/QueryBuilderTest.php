@@ -95,7 +95,7 @@ it(
     function () {
         $query = getQueryBuilder();
 
-        $query->from('posts')->where('title', '=', 'Mon premier article');
+        $query->from('posts')->where('title', '=');
 
         expect($query->toSQL())->toBeString()->toBe('SELECT * FROM posts WHERE title = :title');
     }
@@ -128,7 +128,7 @@ it(
     function () {
         $query = getQueryBuilder();
 
-        $query->from('posts')->where('name', '=', 'my title')->delete();
+        $query->from('posts')->where('name', '=')->delete();
 
         expect($query->from('posts')->toSQL())->toBeString()->toBe('DELETE FROM posts WHERE name = :name');
     }
@@ -140,8 +140,8 @@ it(
         $query = getQueryBuilder();
 
         $query->from('posts')
-            ->where('name', '=', 'my title')
-            ->where('slug', '=', 'my-title')
+            ->where('name', '=')
+            ->where('slug', '=')
             ->delete();
 
         expect($query->from('posts')->toSQL())->toBeString()->toBe(
@@ -178,7 +178,7 @@ it(
         $query
             ->from('posts')
             ->update(['title' => 'New title', 'slug' => 'new-title'])
-            ->where('title', '=', 'title')
+            ->where('title', '=')
             ->toSql();
 
         expect($query->toSQL())->toBeString()->toBe(
@@ -195,8 +195,8 @@ it(
         $query
             ->from('posts')
             ->update(['title' => 'New title', 'slug' => 'new-title'])
-            ->where('title', '=', 'title')
-            ->where('slug', '=', 'my-title')
+            ->where('title', '=')
+            ->where('slug', '=')
             ->toSql();
 
         expect($query->toSQL())
@@ -222,10 +222,12 @@ it(
         $query->select(['title'])
             ->from('posts', 'p')
             ->innerJoin('authors', 'a')
-            ->on('p.author_id', 'a.id');
+            ->on('p.author_id', 'a.id')
+            ->where('p.author_name', '=', 'a.name');
+
 
         expect($query->toSQL())
             ->toBeString()
-            ->toBe('SELECT title FROM posts p INNER JOIN authors a ON p.author_id = a.id');
+            ->toBe('SELECT title FROM posts p INNER JOIN authors a ON p.author_id = a.id WHERE p.author_name = a.name');
     }
 );
