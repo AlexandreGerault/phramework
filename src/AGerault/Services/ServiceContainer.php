@@ -47,9 +47,6 @@ class ServiceContainer implements ServiceContainerInterface
     protected array $parameters = [];
 
     /**
-     * @param string $id
-     *
-     * @return mixed
      * @throws ReflectionException
      * @throws ServiceNotFoundException
      * @throws ContainerException
@@ -76,10 +73,6 @@ class ServiceContainer implements ServiceContainerInterface
         return isset($this->instances[$id]);
     }
 
-    /**
-     * @param string $alias
-     * @param string $target
-     */
     public function addAlias(string $alias, string $target): void
     {
         $this->aliases[$alias] = $target;
@@ -149,7 +142,6 @@ class ServiceContainer implements ServiceContainerInterface
     }
 
     /**
-     * @param string $id
      * @throws ContainerException
      * @throws ReflectionException
      * @throws ServiceNotFoundException
@@ -183,8 +175,6 @@ class ServiceContainer implements ServiceContainerInterface
     }
 
     /**
-     * @param string $id
-     * @return ServiceDefinitionInterface
      * @throws ContainerException
      * @throws ReflectionException
      * @throws ServiceNotFoundException
@@ -199,8 +189,6 @@ class ServiceContainer implements ServiceContainerInterface
     }
 
     /**
-     * @param string $id
-     * @return object
      * @throws ContainerException
      * @throws ReflectionException
      * @throws ServiceNotFoundException
