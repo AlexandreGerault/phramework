@@ -47,13 +47,17 @@ class ServiceContainer implements ServiceContainerInterface
     protected array $parameters = [];
 
     /**
+     * @var array<string, callable>
+     */
+    protected array $factories = [];
+
+    /**
      * @throws ReflectionException
      * @throws ServiceNotFoundException
      * @throws ContainerException
      */
     public function get(string $id): mixed
     {
-        // If we have no instances of this id, let's build one
         if (!$this->has($id)) {
             $instance = $this->resolve($id);
 
@@ -199,6 +203,11 @@ class ServiceContainer implements ServiceContainerInterface
             throw new ServiceNotFoundException("This class or interface cannot be resolved");
         }
 
+        // If we have no instances of this id, let's build one
+        if (array_key_exists($id, $this->factories)) {
+            return $this->factories[$id]();
+        }
+
         $reflectionClass = new ReflectionClass($id);
 
         // If we are handling an interface, we have to resolve to its class
@@ -227,5 +236,10 @@ class ServiceContainer implements ServiceContainerInterface
     public function getParameter(string $id): mixed
     {
         return $this->parameters[$id];
+    }
+
+    public function addFactory(string $id, callable $factory): void
+    {
+        $this->factories[$id] = $factory;
     }
 }
