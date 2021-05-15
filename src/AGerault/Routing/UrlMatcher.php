@@ -25,7 +25,7 @@ class UrlMatcher implements UrlMatcherInterface
      * @param string $uri
      * @param string $method
      * @return RouteInterface
-     * @throws Exception
+     * @throws RouteNotFoundException
      */
     public function match(string $uri, string $method): RouteInterface
     {
