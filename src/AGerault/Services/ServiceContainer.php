@@ -208,11 +208,6 @@ class ServiceContainer implements ServiceContainerInterface
             throw new ServiceNotFoundException("This class or interface cannot be resolved");
         }
 
-        // If we have no instances of this id, let's build one
-        if (array_key_exists($id, $this->factories)) {
-            return $this->factories[$id]();
-        }
-
         $reflectionClass = new ReflectionClass($id);
 
         // If we are handling an interface, we have to resolve to its class
