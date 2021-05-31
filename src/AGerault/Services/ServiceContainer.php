@@ -58,11 +58,6 @@ class ServiceContainer implements ServiceContainerInterface
      */
     public function get(string $id): mixed
     {
-        // If we have no instances of this id, let's build one
-        if (array_key_exists($id, $this->factories)) {
-            return call_user_func($this->factories[$id]);
-        }
-
         if (!$this->has($id)) {
             $instance = $this->resolve($id);
 
@@ -216,6 +211,10 @@ class ServiceContainer implements ServiceContainerInterface
         }
 
         $this->getDefinition($id);
+
+        if (array_key_exists($id, $this->factories)) {
+            return call_user_func($this->factories[$id]);
+        }
 
         // If the constructor of the class is null, no dependencies are required
         if ($reflectionClass->getConstructor() === null) {
