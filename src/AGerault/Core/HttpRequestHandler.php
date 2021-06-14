@@ -16,7 +16,6 @@ class HttpRequestHandler implements HttpRequestHandlerInterface
         $this->matcher = $matcher;
     }
 
-
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
             $route = $this->matcher->match(
