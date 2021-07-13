@@ -2,6 +2,7 @@
 
 namespace Test\Fixtures\Routing;
 
+use AGerault\Framework\Contracts\HTTP\MiddlewareInterface;
 use AGerault\Framework\Contracts\Routing\RouteInterface;
 
 class MockedRoute implements RouteInterface
@@ -43,5 +44,10 @@ class MockedRoute implements RouteInterface
 
     public function setParameter(string $parameterName, mixed $value): void
     {
+    }
+
+    public function middlewares(): array
+    {
+        return [];
     }
 }
