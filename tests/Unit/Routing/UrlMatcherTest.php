@@ -57,6 +57,11 @@ it(
                         public function setParameter(string $parameterName, mixed $value): void
                         {
                         }
+
+                        public function middlewares(): array
+                        {
+                            return [];
+                        }
                     },
                     new class implements RouteInterface {
                         public function name(): string
@@ -99,6 +104,11 @@ it(
                         public function setParameter(string $parameterName, mixed $value): void
                         {
                         }
+
+                        public function middlewares(): array
+                        {
+                            return [];
+                        }
                     },
                     new class implements RouteInterface {
                         public function name(): string
@@ -140,6 +150,11 @@ it(
 
                         public function setParameter(string $parameterName, mixed $value): void
                         {
+                        }
+
+                        public function middlewares(): array
+                        {
+                            return [];
                         }
                     }
                 ];
@@ -194,6 +209,11 @@ it(
 
             public function setParameter(string $parameterName, mixed $value): void
             {
+            }
+
+            public function middlewares(): array
+            {
+                return [];
             }
         };
 
