@@ -8,6 +8,10 @@ class Session implements SessionInterface
 {
     public function __construct()
     {
+    }
+
+    public function start(): void
+    {
         session_start();
     }
 
@@ -34,5 +38,25 @@ class Session implements SessionInterface
     public function forget(string $key): void
     {
         unset($_SESSION[$key]);
+    }
+
+    public function offsetExists($offset)
+    {
+        return $this->has($offset);
+    }
+
+    public function offsetGet($offset)
+    {
+        return $this->get($offset);
+    }
+
+    public function offsetSet($offset, $value)
+    {
+        $this->put($offset, $value);
+    }
+
+    public function offsetUnset($offset)
+    {
+        $this->forget($offset);
     }
 }
