@@ -6,13 +6,11 @@ use AGerault\Framework\Contracts\Core\ApplicationInterface;
 use AGerault\Framework\Contracts\Routing\RouteCollectionInterface;
 use AGerault\Framework\Contracts\Services\ServiceContainerInterface;
 use AGerault\Framework\Routing\Route;
-use AGerault\Framework\Routing\RouteCollection;
-use AGerault\Framework\Services\ServiceContainer;
-use Psr\Container\ContainerInterface;
+use Exception;
 
 class Application implements ApplicationInterface
 {
-    protected ContainerInterface $container;
+    protected ServiceContainerInterface $container;
     protected RouteCollectionInterface $routes;
 
     public function __construct(ServiceContainerInterface $container, RouteCollectionInterface $routes)
@@ -23,7 +21,7 @@ class Application implements ApplicationInterface
 
     public function version(): string
     {
-        return '0.0.1-BETA';
+        return '0.0.3-BETA';
     }
 
     public function basePath($path = ''): string
@@ -52,7 +50,7 @@ class Application implements ApplicationInterface
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function registerRoutes(array $router): RouteCollectionInterface
     {
