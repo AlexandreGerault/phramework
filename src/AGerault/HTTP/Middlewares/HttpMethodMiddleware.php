@@ -11,10 +11,8 @@ class HttpMethodMiddleware implements MiddlewareInterface
 {
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $method = $request->getAttribute('_method') ?? $request->getMethod();
-
-        if ($request->getAttribute('_method')) {
-            $request = $request->withMethod($method);
+        if (array_key_exists('_method', $request->getParsedBody())) {
+            $request = $request->withMethod($request->getParsedBody()['_method']);
         }
 
         return $handler->handle($request);

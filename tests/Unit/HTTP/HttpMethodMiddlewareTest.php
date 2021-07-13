@@ -6,7 +6,7 @@ use Test\Fixtures\HTTP\DummyHandler;
 
 it('should change the request method', function () {
     $request = new ServerRequest("POST", "/");
-    $request = $request->withAttribute("_method", "PUT");
+    $request = $request->withParsedBody(["_method" => "PUT"]);
     $middleware = new HttpMethodMiddleware();
     $handler = new DummyHandler();
 
