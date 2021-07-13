@@ -36,7 +36,8 @@ it(
 it(
     'should throw an exception if no middleware create a response',
     function () {
-        $pipe = new MiddlewarePipe([new AddDummyHeaderToResponseMiddleware()]);
+        $pipe = new MiddlewarePipe();
+        $pipe->push(new AddDummyHeaderToResponseMiddleware());
         $handler = new HttpRequestHandler($pipe);
 
         $request = new ServerRequest("GET", "/");
