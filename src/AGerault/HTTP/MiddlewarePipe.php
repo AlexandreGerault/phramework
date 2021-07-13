@@ -8,7 +8,7 @@ use Generator;
 
 class MiddlewarePipe implements MiddlewarePipeInterface
 {
-    public function __construct(protected array $middlewares) {}
+    public function __construct(protected array $middlewares = []) {}
 
     public function push(MiddlewareInterface $middleware): void
     {
