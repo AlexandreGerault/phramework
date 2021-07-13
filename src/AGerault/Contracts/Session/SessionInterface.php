@@ -2,8 +2,12 @@
 
 namespace AGerault\Framework\Contracts\Session;
 
-interface SessionInterface
+use ArrayAccess;
+
+interface SessionInterface extends ArrayAccess
 {
+    public function start(): void;
+
     public function has(string $key): bool;
 
     public function get(string $key): mixed;

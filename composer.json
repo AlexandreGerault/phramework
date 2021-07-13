@@ -25,7 +25,8 @@
     "psr/simple-cache": "^1.0",
     "ext-pdo": "*",
     "psr/http-server-handler": "^1.0",
-    "beberlei/assert": "^3.3"
+    "beberlei/assert": "^3.3",
+    "psr/http-server-middleware": "^1.0"
   },
   "require-dev": {
     "pestphp/pest": "^1.0",
@@ -33,6 +34,7 @@
     "guzzlehttp/guzzle": "^7.2",
     "phpstan/phpstan": "^0.12.82",
     "jetbrains/phpstorm-attributes": "^1.0",
-    "friendsofphp/php-cs-fixer": "^v3.0.0"
+    "friendsofphp/php-cs-fixer": "^v3.0.0",
+    "pestphp/pest-plugin-mock": "^1.0"
   }
 }

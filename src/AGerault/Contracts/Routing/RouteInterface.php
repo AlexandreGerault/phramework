@@ -2,6 +2,8 @@
 
 namespace AGerault\Framework\Contracts\Routing;
 
+use AGerault\Framework\Contracts\HTTP\MiddlewareInterface;
+
 interface RouteInterface
 {
     public function name(): string;
@@ -27,4 +29,7 @@ interface RouteInterface
     public function parameters(): array;
 
     public function setParameter(string $parameterName, mixed $value): void;
+
+    /** @return MiddlewareInterface[] */
+    public function middlewares(): array;
 }

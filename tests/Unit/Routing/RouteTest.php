@@ -3,6 +3,7 @@
 use AGerault\Framework\Routing\Exceptions\HttpVerbNotAllowedException;
 use AGerault\Framework\Routing\Exceptions\ParameterNotFoundException;
 use AGerault\Framework\Routing\Route;
+use GuzzleHttp\Psr7\Response;
 
 it(
     'should throw an exception if it use a wrong HTTP verb',
@@ -101,3 +102,16 @@ it(
         expect(call_user_func_array($route->callback(), []))->toBe('index page');
     }
 );
+
+it("should be able to get route's middlewares", function () {
+    $callback = new class {
+        public function index()
+        {
+            return new Response(200, [], "");
+        }
+    };
+
+    $route = new Route("/", "home", "GET", [$callback, 'index']);
+
+    expect($route->middlewares())->toBeArray();
+});

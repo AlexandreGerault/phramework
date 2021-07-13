@@ -2,6 +2,7 @@
 
 namespace AGerault\Framework\Routing;
 
+use AGerault\Framework\Contracts\HTTP\MiddlewareInterface;
 use AGerault\Framework\Contracts\Routing\RouteInterface;
 use AGerault\Framework\Routing\Exceptions\HttpVerbNotAllowedException;
 use AGerault\Framework\Routing\Exceptions\ParameterNotFoundException;
@@ -17,19 +18,16 @@ class Route implements RouteInterface
 
     protected string $method;
 
-    /**
-     * @var array<string>
-     */
+    /** @var MiddlewareInterface[]  */
+    protected array $middlewares = [];
+
+    /** @var array<string> */
     protected array $parameterNames = [];
 
-    /**
-     * @var array<string, mixed>
-     */
+    /** @var array<string, mixed> */
     protected array $parameters = [];
 
-    /**
-     * @var callable
-     */
+    /** @var callable */
     protected $action;
 
     /**
@@ -39,6 +37,7 @@ class Route implements RouteInterface
      * @param string $method
      * @param callable $action
      * @param array<string> $parameterNames
+     * @param array<MiddlewareInterface> $middlewares
      * @throws Exception
      */
     public function __construct(
@@ -46,13 +45,15 @@ class Route implements RouteInterface
         string $name,
         string $method,
         callable $action,
-        array $parameterNames = []
+        array $parameterNames = [],
+        array $middlewares = []
     ) {
         $this->name = $name;
         $this->parameterNames = $parameterNames;
         $this->action = $action;
         $this->setPath($path);
         $this->setMethod($method);
+        $this->middlewares = $middlewares ?? [];
     }
 
     public function name(): string
@@ -122,5 +123,10 @@ class Route implements RouteInterface
         }
 
         $this->method = $method;
+    }
+
+    public function middlewares(): array
+    {
+        return $this->middlewares;
     }
 }
