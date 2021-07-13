@@ -1,6 +1,5 @@
 <?php
 
-use AGerault\Framework\HTTP\HttpRequestHandler;
 use AGerault\Framework\HTTP\Middlewares\RouteProcessMiddleware;
 use AGerault\Framework\Routing\Route;
 use AGerault\Framework\Routing\RouteCollection;
