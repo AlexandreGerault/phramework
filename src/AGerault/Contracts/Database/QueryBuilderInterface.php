@@ -23,8 +23,17 @@ interface QueryBuilderInterface
     public function select(array $columns): self;
 
     /**
+     * Select the columns to fetch from the joining table
+     *
+     * @param array<string> $columns
+     * @return $this
+     */
+    public function selectOnJoinTable(array $columns): self;
+
+    /**
      * Specify the amount of results to fetch.
      *
+     * @param int $amount
      * @return QueryBuilderInterface
      */
     public function limit(int $amount): self;
@@ -32,6 +41,7 @@ interface QueryBuilderInterface
     /**
      * Specify the amount of results to skip.
      *
+     * @param int $offset
      * @return QueryBuilderInterface
      */
     public function offset(int $offset): self;
@@ -97,5 +107,11 @@ interface QueryBuilderInterface
      */
     public function on(string $left, string $right): self;
 
+    /**
+     * Aliases if needed the column names
+     *
+     * @param bool $enable
+     * @return $this
+     */
     public function withAliasPrefixOnColumns(bool $enable = true): self;
 }
