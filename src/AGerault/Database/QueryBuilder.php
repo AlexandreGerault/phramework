@@ -12,6 +12,7 @@ class QueryBuilder implements QueryBuilderInterface
      * @var string[]
      */
     protected array $select = ['*'];
+    protected array $selectOnJoiningTable = [];
 
     protected string $from;
     protected ?string $fromAlias = null;
@@ -51,6 +52,8 @@ class QueryBuilder implements QueryBuilderInterface
     protected ?string $joinTableAlias = null;
 
     protected ?string $joinCondition = null;
+
+    protected bool $aliasPrefixOnColumn = false;
 
     public function from(string $tableName, ?string $tableAlias = null): QueryBuilderInterface
     {
@@ -137,7 +140,17 @@ class QueryBuilder implements QueryBuilderInterface
 
     private function buildSelectQuery(): string
     {
-        $select = implode(', ', $this->select);
+        $select = $this->aliasPrefixOnColumn
+            ? implode(', ', array_map(fn (string $a) => ($this->selectOnJoiningTable ? $this->fromAlias . '.' : '') . $a . ' as '. $this->from . '_' . $a, $this->select))
+            : implode(', ', $this->select);
+
+        if ($this->selectOnJoiningTable) {
+            $select .= ", ";
+            $select .= $this->aliasPrefixOnColumn
+                ? implode(', ', array_map(fn (string $a) => ($this->selectOnJoiningTable ? $this->joinTableAlias . '.' : '') . $a . ' as '. $this->joinTable . '_' . $a, $this->selectOnJoiningTable))
+                : implode(', ', $this->select);
+        }
+
         $query = "SELECT {$select} FROM {$this->from}";
 
         if ($this->fromAlias) {
@@ -265,5 +278,19 @@ class QueryBuilder implements QueryBuilderInterface
         }
 
         return $query;
+    }
+
+    public function withAliasPrefixOnColumns(bool $enable = true): QueryBuilderInterface
+    {
+        $this->aliasPrefixOnColumn = $enable;
+
+        return $this;
+    }
+
+    public function selectOnJoinTable(array $columns): QueryBuilderInterface
+    {
+        $this->selectOnJoiningTable = $columns;
+
+        return $this;
     }
 }
