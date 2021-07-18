@@ -213,7 +213,7 @@ class ServiceContainer implements ServiceContainerInterface
         $this->getDefinition($id);
 
         if (array_key_exists($id, $this->factories)) {
-            return call_user_func($this->factories[$id]);
+            return call_user_func($this->factories[$id], $this);
         }
 
         // If the constructor of the class is null, no dependencies are required
