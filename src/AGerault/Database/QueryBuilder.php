@@ -52,6 +52,8 @@ class QueryBuilder implements QueryBuilderInterface
 
     protected ?string $joinCondition = null;
 
+    protected bool $aliasPrefixOnColumn = false;
+
     public function from(string $tableName, ?string $tableAlias = null): QueryBuilderInterface
     {
         $this->from = $tableName;
@@ -137,7 +139,10 @@ class QueryBuilder implements QueryBuilderInterface
 
     private function buildSelectQuery(): string
     {
-        $select = implode(', ', $this->select);
+        $select = $this->aliasPrefixOnColumn
+            ? implode(', ', array_map(fn (string $a) => $a . ' as '. $this->from . '_' . $a, $this->select))
+            : implode(', ', $this->select);
+
         $query = "SELECT {$select} FROM {$this->from}";
 
         if ($this->fromAlias) {
@@ -265,5 +270,12 @@ class QueryBuilder implements QueryBuilderInterface
         }
 
         return $query;
+    }
+
+    public function withAliasPrefixOnColumns(bool $enable = true): QueryBuilderInterface
+    {
+        $this->aliasPrefixOnColumn = $enable;
+
+        return $this;
     }
 }

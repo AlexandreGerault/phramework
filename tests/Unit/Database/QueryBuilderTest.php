@@ -231,3 +231,22 @@ it(
             ->toBe('SELECT title FROM posts p INNER JOIN authors a ON p.author_id = a.id WHERE p.author_name = a.name');
     }
 );
+
+it(
+    "should be able to add aliases to each column",
+    function () {
+        $query = getQueryBuilder();
+
+        $query->select(['title'])
+            ->withAliasPrefixOnColumns(true)
+            ->from('posts', 'p')
+            ->innerJoin('authors', 'a')
+            ->on('p.author_id', 'a.id')
+            ->where('p.author_name', '=', 'a.name');
+
+
+        expect($query->toSQL())
+            ->toBeString()
+            ->toBe('SELECT title as posts_title FROM posts p INNER JOIN authors a ON p.author_id = a.id WHERE p.author_name = a.name');
+    }
+);

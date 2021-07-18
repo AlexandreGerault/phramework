@@ -96,4 +96,6 @@ interface QueryBuilderInterface
      * @return $this
      */
     public function on(string $left, string $right): self;
+
+    public function withAliasPrefixOnColumns(bool $enable = true): self;
 }
