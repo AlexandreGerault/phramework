@@ -263,7 +263,7 @@ class QueryBuilder implements QueryBuilderInterface
     {
         if ($this->conditions) {
             $conditions = implode(
-                ', ',
+                ' AND ',
                 array_map(
                     function ($name, $payload) {
                         $value = $payload['value'] ?? ":{$name}";

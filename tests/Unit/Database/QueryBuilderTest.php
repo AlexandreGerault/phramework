@@ -145,7 +145,7 @@ it(
             ->delete();
 
         expect($query->from('posts')->toSQL())->toBeString()->toBe(
-            'DELETE FROM posts WHERE name = :name, slug = :slug'
+            'DELETE FROM posts WHERE name = :name AND slug = :slug'
         );
     }
 );
@@ -201,7 +201,7 @@ it(
 
         expect($query->toSQL())
             ->toBeString()
-            ->toBe('UPDATE posts SET title = :title, slug = :slug WHERE title = :title, slug = :slug');
+            ->toBe('UPDATE posts SET title = :title, slug = :slug WHERE title = :title AND slug = :slug');
     }
 );
 
