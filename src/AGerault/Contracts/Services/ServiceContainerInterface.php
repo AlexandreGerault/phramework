@@ -14,7 +14,7 @@ interface ServiceContainerInterface extends ContainerInterface
     /**
      * Register a provider to instantiate a class that needs logic to be instantiated
      */
-    public function addFactory(string $id, string $class, string $method): self;
+    public function addFactory(string $id, string $class, string $method, mixed ...$args): self;
 
     /**
      * Register a service definition
