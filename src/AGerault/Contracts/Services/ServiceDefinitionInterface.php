@@ -2,6 +2,8 @@
 
 namespace AGerault\Framework\Contracts\Services;
 
+use AGerault\Framework\Services\ServiceContainer;
+
 interface ServiceDefinitionInterface
 {
     /**
@@ -34,4 +36,12 @@ interface ServiceDefinitionInterface
      * Make the service be instantiated only once (default)
      */
     public function makeShared(): void;
+
+    /**
+     * Build a new instance of the service
+     *
+     * @param ServiceContainer $container
+     * @return object
+     */
+    public function newInstance(ServiceContainer $container): object;
 }

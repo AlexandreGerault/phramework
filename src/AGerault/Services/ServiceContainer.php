@@ -9,6 +9,7 @@ use AGerault\Framework\Services\Exceptions\ServiceNotFoundException;
 use JetBrains\PhpStorm\Pure;
 use ReflectionClass;
 use ReflectionException;
+use ReflectionMethod;
 use ReflectionNamedType;
 use ReflectionParameter;
 use ReflectionUnionType;
@@ -58,10 +59,14 @@ class ServiceContainer implements ServiceContainerInterface
      */
     public function get(string $id): mixed
     {
-        if (!$this->has($id)) {
-            $instance = $this->resolve($id);
+        if (!class_exists($id) && !interface_exists($id)) {
+            throw new ServiceNotFoundException($id);
+        }
 
-            if (! $this->getDefinition($id)->isShared()) {
+        if (!$this->has($id)) {
+            $instance = $this->getDefinition($id)->newInstance($this);
+
+            if (!$this->getDefinition($id)->isShared()) {
                 return $instance;
             }
 
@@ -106,10 +111,10 @@ class ServiceContainer implements ServiceContainerInterface
                 function (ReflectionParameter $param) {
                     $type = $param->getType();
                     if ($type instanceof ReflectionNamedType) {
-                        return ! $type->isBuiltin();
+                        return !$type->isBuiltin();
                     } elseif ($type instanceof ReflectionUnionType) {
                         foreach ($type->getTypes() as $t) {
-                            if (! $t->isBuiltin()) {
+                            if (!$t->isBuiltin()) {
                                 return false;
                             }
                         }
@@ -173,7 +178,21 @@ class ServiceContainer implements ServiceContainerInterface
 
         $aliases = array_filter($this->aliases, fn(string $alias) => $alias === $id);
 
-        $definition = new ServiceDefinition($id, true, $aliases, $dependencies);
+        $factory = null;
+        if (isset($this->factories[$id])) {
+            $factory = [
+                "factory" => new ReflectionMethod(
+                    $this->factories[$id]["class"],
+                    $this->factories[$id]["method"]
+                )
+            ];
+            if (isset($this->factories[$id]["args"])) {
+                $factory["args"] = $this->factories[$id]["args"];
+            }
+        }
+
+        $definition = new ServiceDefinition($id, true, $aliases, $dependencies, $factory["factory"] ?? null, $factory["args"] ?? []);
+
 
         $this->definitions[$id] = $definition;
     }
@@ -200,7 +219,7 @@ class ServiceContainer implements ServiceContainerInterface
     private function resolve(string $id): object
     {
         if (!class_exists($id) && !interface_exists($id)) {
-            throw new ServiceNotFoundException("This class or interface cannot be resolved");
+            throw new ServiceNotFoundException($id);
         }
 
         $reflectionClass = new ReflectionClass($id);
@@ -237,8 +256,16 @@ class ServiceContainer implements ServiceContainerInterface
         return $this->parameters[$id];
     }
 
-    public function addFactory(string $id, callable $factory): void
+    public function addFactory(string $id, string $class, string $method, mixed ...$args): self
     {
+        $factory = ["class" => $class, "method" => $method];
+
+        if (count($args)) {
+            $factory["args"] = $args;
+        }
+
         $this->factories[$id] = $factory;
+
+        return $this;
     }
 }

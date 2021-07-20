@@ -5,6 +5,7 @@ use AGerault\Framework\Services\Exceptions\ServiceNotFoundException;
 use AGerault\Framework\Services\ServiceContainer;
 use Test\Fixtures\Services\BarService;
 use Test\Fixtures\Services\DependsOnFactoryService;
+use Test\Fixtures\Services\Factory;
 use Test\Fixtures\Services\FactoryService;
 use Test\Fixtures\Services\FooService;
 use Test\Fixtures\Services\NotSharedService;
@@ -110,37 +111,15 @@ it(
 )->throws(ServiceNotFoundException::class);
 
 it(
-    'should be able to register a factory and call it to instanciate a service',
+    'should be able to register a factory and call it to instantiate a service',
     function () {
-        $factory = function () {
-            return new FactoryService("Name");
-        };
-
         $container = new ServiceContainer();
 
-        $container->addFactory(FactoryService::class, $factory);
+        $container->addFactory(FactoryService::class, Factory::class, 'makeFactoryService', "Name");
 
         $service = $container->get(FactoryService::class);
 
         expect($service)->toBeInstanceOf(FactoryService::class);
         expect($service->name())->toBe("Name");
-    }
-);
-
-it(
-    "should be able to build a service that depends on a factory service",
-    function () {
-        $factory = function () {
-            return new FactoryService("Name");
-        };
-
-        $container = new ServiceContainer();
-
-        $container->addFactory(FactoryService::class, $factory);
-
-        $service = $container->get(DependsOnFactoryService::class);
-
-        expect($service)->toBeInstanceOf(DependsOnFactoryService::class);
-        expect($service->factory()->name())->toBe("Name");
     }
 );
